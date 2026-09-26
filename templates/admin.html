@@ -238,11 +238,24 @@
 
         <!-- Form -->
         <form id="uploadMaterialForm" onsubmit="handleMaterialUpload(event)" class="space-y-6">
-          <!-- File Drop Zone -->
-          <div>
+          
+          <!-- Source Mode Selector: File vs External Link -->
+          <div class="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl">
+            <button type="button" id="sourceTypeFileBtn" onclick="switchUploadSourceMode('file')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-file-arrow-up"></i>
+              <span>Upload File from Computer</span>
+            </button>
+            <button type="button" id="sourceTypeLinkBtn" onclick="switchUploadSourceMode('link')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-link"></i>
+              <span>Share External Web Link / YouTube URL</span>
+            </button>
+          </div>
+
+          <!-- OPTION A: File Drop Zone -->
+          <div id="fileUploadContainer">
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Resource File <span class="text-rose-500">*</span></label>
             <div id="dropZoneContainer" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-indigo-50/20 transition-all cursor-pointer relative" onclick="document.getElementById('fileInput').click()">
-              <input type="file" id="fileInput" name="file" class="hidden" onchange="handleFileSelection(event)" required />
+              <input type="file" id="fileInput" name="file" class="hidden" onchange="handleFileSelection(event)" />
               
               <div id="dropZoneEmpty">
                 <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
@@ -266,6 +279,16 @@
                 </button>
               </div>
             </div>
+          </div>
+
+          <!-- OPTION B: External Link Input Zone -->
+          <div id="linkUploadContainer" class="hidden space-y-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">External Link / Web URL <span class="text-rose-500">*</span></label>
+            <div class="relative">
+              <i class="fa-solid fa-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="url" id="externalUrlInput" name="external_url" placeholder="e.g. https://www.youtube.com/watch?v=... or Google Drive / Web Link" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            </div>
+            <p class="text-[11px] text-slate-400">Paste any public URL: YouTube video lectures, Google Drive resources, Wikipedia, articles, or documentation.</p>
           </div>
 
           <!-- Metadata Grid -->

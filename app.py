@@ -8,7 +8,7 @@ from typing import Optional, List, Dict, Any
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Header, Request, Depends
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -489,7 +489,8 @@ async def get_material_detail(material_id: str):
 
 @app.post("/api/materials")
 async def upload_material(
-    file: UploadFile = File(...),
+    file: Optional[UploadFile] = File(None),
+    external_url: Optional[str] = Form(None),
     title: str = Form(...),
     category: str = Form(...),
     chapter: str = Form(...),
@@ -502,7 +503,6 @@ async def upload_material(
     user = require_auth(authorization)
     
     users_db = read_json(USERS_FILE, {})
-    # Check live permissions
     can_upload = False
     is_one_time = False
 
@@ -517,7 +517,6 @@ async def upload_material(
         else:
             raise HTTPException(status_code=403, detail="Your One-Time Pass has already been used or expired.")
     else:
-        # Standard teacher
         db_user = next((t for t in users_db.get("users", []) if t["id"] == user["user_id"]), None)
         if db_user and db_user.get("can_upload", False):
             can_upload = True
@@ -530,30 +529,63 @@ async def upload_material(
             detail="Upload permission denied. You do not currently have upload access. Please contact the Admin."
         )
 
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="Empty filename provided")
+    # Check whether a file or an external URL was provided
+    is_link = False
+    clean_url = external_url.strip() if external_url else ""
+
+    if clean_url:
+        is_link = True
+        if not clean_url.startswith(("http://", "https://")):
+            clean_url = "https://" + clean_url
+
+        # Auto-detect resource type for external link if not explicitly set
+        if not resource_type or resource_type.strip() == "":
+            low_url = clean_url.lower()
+            if any(k in low_url for k in ["youtube.com", "youtu.be", "vimeo.com", "dailymotion.com"]):
+                chosen_type = "videos"
+            elif any(k in low_url for k in ["slideshare.net", "canva.com", "docs.google.com/presentation"]):
+                chosen_type = "slides"
+            elif any(k in low_url for k in ["spotify.com", "soundcloud.com", "podcast"]):
+                chosen_type = "audio"
+            else:
+                chosen_type = "documents"
+        else:
+            chosen_type = resource_type.strip()
+
+        is_youtube = any(k in clean_url.lower() for k in ["youtube.com", "youtu.be"])
+        filesize = 0
+        filesize_formatted = "YouTube Video" if is_youtube else "Web Link"
+        unique_filename = "External Link"
+        original_name = clean_url
+        file_url = clean_url
+
+    elif file and file.filename:
+        chosen_type = detect_resource_type(file.filename, resource_type)
+        target_folder = UPLOADS_DIR / chosen_type
+        target_folder.mkdir(parents=True, exist_ok=True)
         
-    chosen_type = detect_resource_type(file.filename, resource_type)
-    target_folder = UPLOADS_DIR / chosen_type
-    target_folder.mkdir(parents=True, exist_ok=True)
-    
-    ext = Path(file.filename).suffix
-    stem = Path(file.filename).stem
-    safe_stem = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in stem)[:50]
-    unique_filename = f"{safe_stem}_{uuid.uuid4().hex[:8]}{ext}"
-    target_path = target_folder / unique_filename
-    
-    try:
-        with open(target_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to write file to disk: {str(e)}")
-    finally:
-        file.file.close()
+        ext = Path(file.filename).suffix
+        stem = Path(file.filename).stem
+        safe_stem = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in stem)[:50]
+        unique_filename = f"{safe_stem}_{uuid.uuid4().hex[:8]}{ext}"
+        target_path = target_folder / unique_filename
         
-    filesize = target_path.stat().st_size
+        try:
+            with open(target_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to write file to disk: {str(e)}")
+        finally:
+            file.file.close()
+            
+        filesize = target_path.stat().st_size
+        filesize_formatted = format_file_size(filesize)
+        original_name = file.filename
+        file_url = f"/uploads/{chosen_type}/{unique_filename}"
+    else:
+        raise HTTPException(status_code=400, detail="Please provide either a file to upload or an external web link.")
+
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
-    
     material_id = f"mat_{uuid.uuid4().hex[:10]}"
     material_entry = {
         "id": material_id,
@@ -564,10 +596,11 @@ async def upload_material(
         "description": description.strip(),
         "tags": tag_list,
         "filename": unique_filename,
-        "original_name": file.filename,
-        "file_url": f"/uploads/{chosen_type}/{unique_filename}",
+        "original_name": original_name,
+        "file_url": file_url,
+        "is_external_link": is_link,
         "filesize": filesize,
-        "filesize_formatted": format_file_size(filesize),
+        "filesize_formatted": filesize_formatted,
         "uploaded_by": user.get("name"),
         "uploaded_at": datetime.utcnow().isoformat() + "Z"
     }
@@ -631,6 +664,9 @@ async def download_material(material_id: str):
     if not item:
         raise HTTPException(status_code=404, detail="Material not found")
         
+    if item.get("is_external_link"):
+        return RedirectResponse(url=item.get("file_url"))
+
     rel_path = item.get("file_url", "").replace("/uploads/", "")
     file_path = UPLOADS_DIR / rel_path
     if not file_path.exists():

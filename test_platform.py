@@ -60,6 +60,33 @@ def test_upload_privacy_protection(admin_token):
     # Cleanup test upload
     client.delete(f"/api/materials/{mat_id}", headers={"Authorization": f"Bearer {admin_token}"})
 
+def test_external_link_upload(admin_token):
+    link_data = {
+        "title": "Quantum Mechanics MIT OpenCourseWare Video Lecture",
+        "category": "Physics",
+        "chapter": "Unit 3",
+        "description": "Comprehensive video lecture on YouTube by MIT.",
+        "external_url": "https://www.youtube.com/watch?v=lZ3bPUKo5zc",
+        "tags": "quantum, youtube, mit",
+        "resource_type": "videos"
+    }
+    res = client.post("/api/materials", data=link_data, headers={"Authorization": f"Bearer {admin_token}"})
+    assert res.status_code == 200
+    mat = res.json()["data"]
+    assert mat["is_external_link"] is True
+    assert mat["file_url"] == "https://www.youtube.com/watch?v=lZ3bPUKo5zc"
+    assert mat["filesize_formatted"] == "YouTube Video"
+    print("[PASS] External Web Link / YouTube upload succeeded and verified")
+
+    # Verify download redirect
+    dl_res = client.get(f"/api/materials/{mat['id']}/download", follow_redirects=False)
+    assert dl_res.status_code in (302, 307)
+    assert dl_res.headers["location"] == "https://www.youtube.com/watch?v=lZ3bPUKo5zc"
+    print("[PASS] External Link download endpoint properly redirects to external URL")
+
+    # Cleanup
+    client.delete(f"/api/materials/{mat['id']}", headers={"Authorization": f"Bearer {admin_token}"})
+
 def test_one_time_teacher_lifecycle(admin_token):
     # 1. Super Admin registers a teacher with upload_type="one_time"
     new_teacher_data = {
@@ -160,6 +187,7 @@ if __name__ == "__main__":
     test_public_pages()
     admin_token = test_auth_and_super_admin()
     test_upload_privacy_protection(admin_token)
+    test_external_link_upload(admin_token)
     test_one_time_teacher_lifecycle(admin_token)
     test_one_time_passcode_lifecycle(admin_token)
     print("\nALL PRIVACY & ACCESS CONTROL TESTS PASSED (100% SUCCESS)!")

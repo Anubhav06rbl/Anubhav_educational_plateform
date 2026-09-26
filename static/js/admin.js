@@ -303,12 +303,38 @@ async function fetchAdminStats() {
 }
 
 // ==========================================
-// RESOURCE UPLOAD & DROPZONE
+// RESOURCE UPLOAD & SOURCE SWITCHER (FILE VS LINK)
 // ==========================================
+
+let currentUploadSourceMode = 'file';
+
+function switchUploadSourceMode(mode) {
+  currentUploadSourceMode = mode;
+  const fileBtn = document.getElementById('sourceTypeFileBtn');
+  const linkBtn = document.getElementById('sourceTypeLinkBtn');
+  const fileBox = document.getElementById('fileUploadContainer');
+  const linkBox = document.getElementById('linkUploadContainer');
+  const submitBtn = document.getElementById('uploadSubmitBtn');
+
+  if (mode === 'file') {
+    fileBtn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center justify-center space-x-1.5";
+    linkBtn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1.5";
+    fileBox.classList.remove('hidden');
+    linkBox.classList.add('hidden');
+    submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Publish Resource';
+  } else {
+    linkBtn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center justify-center space-x-1.5";
+    fileBtn.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center space-x-1.5";
+    fileBox.classList.add('hidden');
+    linkBox.classList.remove('hidden');
+    submitBtn.innerHTML = '<i class="fa-solid fa-link mr-1.5"></i> Share Web Link';
+  }
+}
 
 function setupDropZone() {
   const dropZone = document.getElementById('dropZoneContainer');
   const fileInput = document.getElementById('fileInput');
+  if (!dropZone || !fileInput) return;
 
   ['dragenter', 'dragover'].forEach(eventName => {
     dropZone.addEventListener(eventName, (e) => {
@@ -374,9 +400,10 @@ function processSelectedFile(file) {
 }
 
 function clearSelectedFile(e) {
-  e.stopPropagation();
+  if (e && e.stopPropagation) e.stopPropagation();
   adminState.selectedFile = null;
-  document.getElementById('fileInput').value = "";
+  const fileInput = document.getElementById('fileInput');
+  if (fileInput) fileInput.value = "";
   document.getElementById('dropZoneEmpty').classList.remove('hidden');
   document.getElementById('dropZoneSelected').classList.add('hidden');
 }
@@ -384,19 +411,32 @@ function clearSelectedFile(e) {
 async function handleMaterialUpload(e) {
   e.preventDefault();
   const fileInput = document.getElementById('fileInput');
-  if (!fileInput.files || fileInput.files.length === 0) {
-    alert("Please select a file to upload.");
-    return;
+  const linkInput = document.getElementById('externalUrlInput');
+
+  if (currentUploadSourceMode === 'file') {
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert("Please select a file to upload from your computer, or switch to 'Share External Web Link'.");
+      return;
+    }
+  } else {
+    if (!linkInput.value.trim()) {
+      alert("Please enter a valid web link or YouTube URL.");
+      linkInput.focus();
+      return;
+    }
   }
 
   const submitBtn = document.getElementById('uploadSubmitBtn');
   const feedback = document.getElementById('uploadFeedbackMessage');
   
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Processing...';
   feedback.classList.add('hidden');
 
   const formData = new FormData(document.getElementById('uploadMaterialForm'));
+  if (currentUploadSourceMode === 'link') {
+    formData.delete('file');
+  }
 
   try {
     const res = await fetch('/api/materials', {
@@ -412,10 +452,10 @@ async function handleMaterialUpload(e) {
       
       document.getElementById('uploadMaterialForm').reset();
       clearSelectedFile(new Event('dummy'));
+      switchUploadSourceMode('file');
       fetchAdminStats();
       loadAdminMaterials();
 
-      // If user was on one-time pass, update their live state
       if (adminState.currentUser.upload_type === 'one_time') {
         adminState.currentUser.can_upload = false;
         sessionStorage.setItem('edusphere_user', JSON.stringify(adminState.currentUser));
@@ -431,7 +471,9 @@ async function handleMaterialUpload(e) {
     feedback.className = "text-xs font-bold text-rose-600 block";
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Publish Resource';
+    submitBtn.innerHTML = currentUploadSourceMode === 'file' 
+      ? '<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Publish Resource' 
+      : '<i class="fa-solid fa-link mr-1.5"></i> Share Web Link';
   }
 }
 

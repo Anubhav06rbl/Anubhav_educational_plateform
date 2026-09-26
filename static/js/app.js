@@ -205,19 +205,19 @@ function createMaterialCardHtml(mat) {
       <!-- Card Footer -->
       <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
         <div class="text-[11px] text-slate-400">
-          <i class="fa-solid fa-hard-drive mr-1"></i>${escapeHtml(mat.filesize_formatted || 'File')}
+          <i class="${mat.is_external_link ? 'fa-solid fa-globe' : 'fa-solid fa-hard-drive'} mr-1"></i>${escapeHtml(mat.filesize_formatted || 'File')}
         </div>
 
         <div class="flex items-center space-x-2">
-          <!-- Download Button -->
-          <a href="/api/materials/${mat.id}/download" title="Download Material" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
-            <i class="fa-solid fa-download text-xs"></i>
+          <!-- Download / External Action Button -->
+          <a href="${mat.is_external_link ? mat.file_url : `/api/materials/${mat.id}/download`}" ${mat.is_external_link ? 'target="_blank" rel="noopener noreferrer"' : 'download'} title="${mat.is_external_link ? 'Open Link in New Tab' : 'Download Material'}" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
+            <i class="fa-solid ${mat.is_external_link ? 'fa-arrow-up-right-from-square' : 'fa-download'} text-xs"></i>
           </a>
 
-          <!-- View In Modal Button -->
+          <!-- View In Modal / Open Button -->
           <button onclick="openResourceViewer('${mat.id}')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-indigo-200 flex items-center space-x-1.5 transition-all">
-            <i class="fa-solid fa-eye text-[11px]"></i>
-            <span>Open Viewer</span>
+            <i class="fa-solid ${mat.is_external_link ? 'fa-arrow-up-right-from-square' : 'fa-eye'} text-[11px]"></i>
+            <span>${mat.is_external_link ? 'Open Link' : 'Open Viewer'}</span>
           </button>
         </div>
       </div>
@@ -273,6 +273,11 @@ function resetFilters() {
 function openResourceViewer(materialId) {
   const mat = state.materials.find(m => m.id === materialId);
   if (!mat) return;
+
+  if (mat.is_external_link) {
+    window.open(mat.file_url, '_blank');
+    return;
+  }
 
   const type = mat.resource_type;
   const fileUrl = mat.file_url;
