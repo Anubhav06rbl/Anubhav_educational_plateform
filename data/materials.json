@@ -1,0 +1,141 @@
+[
+  {
+    "id": "mat_1",
+    "title": "Quantum Physics Fundamentals & Wave-Particle Duality",
+    "category": "Physics",
+    "chapter": "Unit 3: Modern Physics & Quantum Mechanics",
+    "resource_type": "documents",
+    "description": "Comprehensive study notes covering Planck's quantum hypothesis, Einstein's photoelectric effect, de Broglie matter waves, and the Heisenberg uncertainty principle.",
+    "tags": [
+      "Physics",
+      "Quantum",
+      "Planck",
+      "Photons",
+      "DeBroglie"
+    ],
+    "filename": "quantum_physics_fundamentals.txt",
+    "file_url": "/uploads/documents/quantum_physics_fundamentals.txt",
+    "filesize": 2540,
+    "filesize_formatted": "1.8 KB",
+    "uploaded_at": "2026-09-20T10:30:00Z"
+  },
+  {
+    "id": "mat_2",
+    "title": "Data Structures & Asymptotic Complexity Handbook",
+    "category": "Computer Science",
+    "chapter": "Module 1: Algorithms & Complexity Analysis",
+    "resource_type": "documents",
+    "description": "Essential cheat-sheet and textbook reference covering Big-O hierarchy, binary search trees, worst-case versus amortized complexities, and balanced trees.",
+    "tags": [
+      "Algorithms",
+      "DataStructures",
+      "Big-O",
+      "BST",
+      "Complexity"
+    ],
+    "filename": "data_structures_guide.pdf",
+    "file_url": "/uploads/documents/data_structures_guide.pdf",
+    "filesize": 3162,
+    "filesize_formatted": "3.5 KB",
+    "uploaded_at": "2026-09-21T11:15:00Z"
+  },
+  {
+    "id": "mat_3",
+    "title": "DNA Replication Fork & Molecular Architecture",
+    "category": "Biology",
+    "chapter": "Chapter 7: Genetics & Molecular Biology",
+    "resource_type": "images",
+    "description": "High-resolution labeled schematic diagram illustrating leading strand continuous synthesis, lagging strand Okazaki fragments, helicase, and DNA polymerase.",
+    "tags": [
+      "Genetics",
+      "DNA",
+      "Biology",
+      "Helicase",
+      "Diagram"
+    ],
+    "filename": "dna_replication_diagram.png",
+    "file_url": "/uploads/images/dna_replication_diagram.png",
+    "filesize": 22050,
+    "filesize_formatted": "32.4 KB",
+    "uploaded_at": "2026-09-22T09:40:00Z"
+  },
+  {
+    "id": "mat_4",
+    "title": "Photosystem I & II Electron Transport Pathway",
+    "category": "Biology",
+    "chapter": "Chapter 4: Plant Physiology & Photosynthesis",
+    "resource_type": "images",
+    "description": "Biochemical pathway diagram depicting light reactions in the thylakoid membrane, water photolysis, and photophosphorylation yielding ATP and NADPH.",
+    "tags": [
+      "Photosynthesis",
+      "Biochemistry",
+      "Plastoquinone",
+      "Diagram"
+    ],
+    "filename": "photosynthesis_biochemistry.png",
+    "file_url": "/uploads/images/photosynthesis_biochemistry.png",
+    "filesize": 16625,
+    "filesize_formatted": "30.1 KB",
+    "uploaded_at": "2026-09-23T14:20:00Z"
+  },
+  {
+    "id": "mat_5",
+    "title": "Machine Learning & Deep Learning 101 Slide Deck",
+    "category": "Computer Science",
+    "chapter": "CS 401: Artificial Intelligence Foundations",
+    "resource_type": "slides",
+    "description": "Landscape presentation slides detailing supervised, unsupervised, and reinforcement learning paradigms, neural network feedforward mechanics, and backpropagation.",
+    "tags": [
+      "MachineLearning",
+      "DeepLearning",
+      "AI",
+      "Slides",
+      "NeuralNetworks"
+    ],
+    "filename": "machine_learning_101_slides.pdf",
+    "file_url": "/uploads/slides/machine_learning_101_slides.pdf",
+    "filesize": 3835,
+    "filesize_formatted": "4.2 KB",
+    "uploaded_at": "2026-09-24T16:00:00Z"
+  },
+  {
+    "id": "mat_6",
+    "title": "Solar System Mechanics & Planetary Orbits Audio Lecture",
+    "category": "Astronomy",
+    "chapter": "Unit 2: Celestial Mechanics",
+    "resource_type": "audio",
+    "description": "Short audio summary discussing Kepler's laws of planetary motion, gravitational orbital resonance, and terrestrial vs jovian planet formation.",
+    "tags": [
+      "Astronomy",
+      "SolarSystem",
+      "Kepler",
+      "Podcast",
+      "Audio"
+    ],
+    "filename": "solar_system_audio_lecture.mp3",
+    "file_url": "/uploads/audio/solar_system_audio_lecture.mp3",
+    "filesize": 50040,
+    "filesize_formatted": "48.8 KB",
+    "uploaded_at": "2026-09-25T08:50:00Z"
+  },
+  {
+    "id": "mat_7",
+    "title": "Introduction to Calculus: Derivatives & Rates of Change",
+    "category": "Mathematics",
+    "chapter": "Differential Calculus: Limits & Tangents",
+    "resource_type": "videos",
+    "description": "Visual video lecture introducing the derivative as instantaneous rate of change, geometric slope of tangent lines, and power rule derivations.",
+    "tags": [
+      "Calculus",
+      "Mathematics",
+      "Derivatives",
+      "Video",
+      "STEM"
+    ],
+    "filename": "introduction_to_calculus.mp4",
+    "file_url": "/uploads/videos/introduction_to_calculus.mp4",
+    "filesize": 1179,
+    "filesize_formatted": "1.2 KB",
+    "uploaded_at": "2026-09-25T13:10:00Z"
+  }
+]

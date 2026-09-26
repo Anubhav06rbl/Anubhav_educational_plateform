@@ -1,0 +1,61 @@
+===================================================================
+QUANTUM PHYSICS FUNDAMENTALS & WAVE-PARTICLE DUALITY
+Department of Modern Physics | Unit 3 Revision Notes
+===================================================================
+
+1. HISTORICAL CONTEXT & BLACKBODY RADIATION
+-------------------------------------------
+Classical physics predicted the "Ultraviolet Catastrophe" using the
+Rayleigh-Jeans law, where spectral radiance would approach infinity
+as frequency increased. In 1900, Max Planck resolved this by proposing
+that energy exchange between matter and radiation occurs only in
+discrete packages termed "quanta":
+
+    E = h * v = (h * c) / lambda
+
+Where:
+- h is Planck's constant (6.62607015 x 10^-34 J*s)
+- v (nu) is frequency in Hertz (s^-1)
+- c is the speed of light (~3.0 x 10^8 m/s)
+- lambda is wavelength in meters
+
+2. THE PHOTOELECTRIC EFFECT (EINSTEIN, 1905)
+--------------------------------------------
+When electromagnetic radiation strikes a metallic surface, electrons
+(photoelectrons) may be emitted. Key experimental observations:
+1. Emission occurs instantaneously (no time lag).
+2. Kinetic energy of emitted electrons depends solely on photon frequency,
+   not light intensity.
+3. Light intensity strictly governs the quantity (current) of emitted
+   electrons per second.
+4. Threshold Frequency (v_0): Below this frequency, no emission occurs
+   regardless of how intense the incident light is.
+
+Einstein's Photoelectric Equation:
+    K_max = h*v - Phi
+    Where Phi = h*v_0 is the work function of the metal.
+
+3. DE BROGLIE MATTER WAVES (1924)
+---------------------------------
+Louis de Broglie hypothesized that dual wave-particle behavior is not
+limited to light, but is a fundamental property of all matter:
+
+    lambda = h / p = h / (m * v)
+
+Key consequence:
+- Macroscopic objects have negligible wavelengths due to large mass.
+- Subatomic particles (electrons, neutrons) exhibit observable
+  diffraction and interference patterns (Davisson-Germer experiment).
+
+4. HEISENBERG UNCERTAINTY PRINCIPLE (1927)
+------------------------------------------
+It is physically impossible to simultaneously measure the exact position
+and momentum of a quantum entity:
+
+    Delta_x * Delta_p >= h / (4 * pi)
+    Delta_E * Delta_t >= h / (4 * pi)
+
+Summary Key Takeaway:
+Quantum mechanics replaces deterministic Newtonian trajectories with
+probabilistic wave functions governed by the Schrödinger equation:
+    i * h_bar * d(Psi)/dt = H_hat * Psi

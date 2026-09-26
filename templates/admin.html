@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduSphere - Teacher & Admin Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-700 flex items-center justify-center text-white shadow-md">
+            <i class="fa-solid fa-chalkboard-user text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xl font-extrabold text-slate-900">EduSphere</span>
+              <span class="px-2 py-0.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full">Admin & Teacher Suite</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central Admin Tabs -->
+        <nav class="hidden md:flex items-center space-x-1">
+          <button id="adminTabUpload" onclick="switchAdminTab('upload')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm">
+            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Upload Resource
+          </button>
+          <button id="adminTabMaterials" onclick="switchAdminTab('materials')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
+            <i class="fa-solid fa-folder-tree mr-1.5"></i>Manage Materials
+          </button>
+          <button id="adminTabQuizBuilder" onclick="switchAdminTab('quizBuilder')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
+            <i class="fa-solid fa-square-plus mr-1.5"></i>Quiz Builder
+          </button>
+          <button id="adminTabSubmissions" onclick="switchAdminTab('submissions')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
+            <i class="fa-solid fa-square-poll-vertical mr-1.5"></i>Student Submissions
+          </button>
+        </nav>
+
+        <!-- Switch to Student Portal -->
+        <div class="flex items-center space-x-3">
+          <a href="/" class="inline-flex items-center space-x-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-indigo-600 shadow-sm transition-all">
+            <i class="fa-solid fa-graduation-cap text-indigo-600"></i>
+            <span>Student Portal</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE TAB NAVIGATION -->
+  <div class="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex items-center space-x-2 overflow-x-auto scrollbar-none">
+    <button onclick="switchAdminTab('upload')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white">Upload</button>
+    <button onclick="switchAdminTab('materials')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Materials</button>
+    <button onclick="switchAdminTab('quizBuilder')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Quiz Builder</button>
+    <button onclick="switchAdminTab('submissions')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Submissions</button>
+  </div>
+
+  <!-- MAIN ADMIN CONTENT -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- KPI / Summary Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-book"></i>
+        </div>
+        <div>
+          <div id="adminStatMaterials" class="text-2xl font-black text-slate-800">--</div>
+          <div class="text-xs font-medium text-slate-400">Total Materials</div>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+        <div>
+          <div id="adminStatQuizzes" class="text-2xl font-black text-slate-800">--</div>
+          <div class="text-xs font-medium text-slate-400">Active Quizzes</div>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+          <div id="adminStatSubmissions" class="text-2xl font-black text-slate-800">--</div>
+          <div class="text-xs font-medium text-slate-400">Submissions</div>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <div id="adminStatAvgScore" class="text-2xl font-black text-slate-800">--%</div>
+          <div class="text-xs font-medium text-slate-400">Average Class Score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 1: UPLOAD EDUCATIONAL RESOURCE -->
+    <!-- ========================================================= -->
+    <section id="adminSectionUpload" class="block">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm max-w-4xl mx-auto">
+        <div class="border-b border-slate-100 pb-5 mb-8">
+          <div class="flex items-center space-x-3">
+            <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </span>
+            <div>
+              <h2 class="text-xl font-black text-slate-800">Upload Educational Resource</h2>
+              <p class="text-xs text-slate-500">Publish lecture notes, video recordings, audio podcasts, diagrams, or slide decks.</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="uploadMaterialForm" onsubmit="handleMaterialUpload(event)" class="space-y-6">
+          
+          <!-- File Drop Zone -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Resource File <span class="text-rose-500">*</span></label>
+            <div id="dropZoneContainer" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-indigo-50/20 transition-all cursor-pointer relative" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" name="file" class="hidden" onchange="handleFileSelection(event)" required />
+              
+              <div id="dropZoneEmpty">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </div>
+                <h4 class="text-sm font-bold text-slate-700">Click to browse or drag and drop your file here</h4>
+                <p class="text-xs text-slate-400 mt-1">Supports PDF, TXT, MP4, WebM, MP3, WAV, PNG, JPG, Slides (PPTX/PDF)</p>
+              </div>
+
+              <!-- Selected File Preview -->
+              <div id="dropZoneSelected" class="hidden flex items-center justify-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shrink-0">
+                  <i id="selectedFileIcon" class="fa-solid fa-file"></i>
+                </div>
+                <div class="text-left">
+                  <div id="selectedFileName" class="text-sm font-bold text-slate-800">filename.pdf</div>
+                  <div id="selectedFileSize" class="text-xs text-slate-500">0.0 KB</div>
+                </div>
+                <button type="button" onclick="clearSelectedFile(event)" class="text-rose-500 hover:text-rose-700 p-2 text-sm font-bold">
+                  <i class="fa-solid fa-trash-can"></i> Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Title -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Resource Title <span class="text-rose-500">*</span></label>
+              <input type="text" id="uploadTitle" name="title" placeholder="e.g. Quantum Physics Fundamentals & Wave-Particle Duality" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+            </div>
+
+            <!-- Category / Subject -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subject / Category <span class="text-rose-500">*</span></label>
+              <input type="text" id="uploadCategory" name="category" placeholder="e.g. Physics, Computer Science, Biology" list="categorySuggestions" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+              <datalist id="categorySuggestions">
+                <option value="Physics"></option>
+                <option value="Computer Science"></option>
+                <option value="Biology"></option>
+                <option value="Mathematics"></option>
+                <option value="Chemistry"></option>
+                <option value="Astronomy"></option>
+              </datalist>
+            </div>
+
+            <!-- Chapter / Unit -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Chapter / Unit <span class="text-rose-500">*</span></label>
+              <input type="text" id="uploadChapter" name="chapter" placeholder="e.g. Unit 3: Quantum Mechanics" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+            </div>
+
+            <!-- Explicit Resource Type Override -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Resource Category / Type</label>
+              <select id="uploadResourceType" name="resource_type" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <option value="">Auto-Detect from File Extension</option>
+                <option value="documents">📄 Document / Note (PDF / TXT / DOC)</option>
+                <option value="videos">🎥 Video Lecture (MP4 / WebM)</option>
+                <option value="audio">🎧 Audio / Podcast (MP3 / WAV)</option>
+                <option value="images">🖼️ Diagram / Photos (PNG / JPG)</option>
+                <option value="slides">📊 Presentation Slides (PDF / PPTX)</option>
+              </select>
+            </div>
+
+            <!-- Tags -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tags (Comma-Separated)</label>
+              <input type="text" id="uploadTags" name="tags" placeholder="e.g. Quantum, Planck, Photons, Revision" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Curriculum Description & Study Notes <span class="text-rose-500">*</span></label>
+              <textarea id="uploadDescription" name="description" rows="3" placeholder="Provide students with context, key concepts covered, or revision guidelines..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></textarea>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div id="uploadFeedbackMessage" class="text-xs font-bold hidden"></div>
+            <button type="submit" id="uploadSubmitBtn" class="ml-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 flex items-center space-x-2 transition-all">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Publish Resource</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 2: MANAGE MATERIALS TABLE -->
+    <!-- ========================================================= -->
+    <section id="adminSectionMaterials" class="hidden">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-black text-slate-800">Uploaded Study Materials</h2>
+            <p class="text-xs text-slate-500">Inspect, test-open, or remove resources from the student portal.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <input type="text" id="adminMaterialSearch" placeholder="Search materials..." oninput="filterAdminMaterials(this.value)" class="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none w-56" />
+            <button onclick="loadAdminMaterials()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Materials Table -->
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Title & Description</th>
+                <th class="py-3 px-4">Subject & Chapter</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4">Size</th>
+                <th class="py-3 px-4">Uploaded</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminMaterialsTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: INTERACTIVE QUIZ BUILDER -->
+    <!-- ========================================================= -->
+    <section id="adminSectionQuizBuilder" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left 2 Cols: The Quiz Builder Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center space-x-3 pb-5 border-b border-slate-100 mb-6">
+              <span class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-pen-ruler"></i>
+              </span>
+              <div>
+                <h2 class="text-xl font-black text-slate-800">Interactive Quiz Builder</h2>
+                <p class="text-xs text-slate-500">Design assessments with multiple choices, answer keys, points, and solutions.</p>
+              </div>
+            </div>
+
+            <!-- Quiz General Info -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Quiz Title <span class="text-rose-500">*</span></label>
+                <input type="text" id="newQuizTitle" placeholder="e.g. Modern Physics & Quantum Mechanics Mastery Test" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subject / Category <span class="text-rose-500">*</span></label>
+                <input type="text" id="newQuizCategory" placeholder="e.g. Physics" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Chapter / Topic <span class="text-rose-500">*</span></label>
+                <input type="text" id="newQuizChapter" placeholder="e.g. Unit 3: Quantum Mechanics" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Time Limit (Minutes)</label>
+                <input type="number" id="newQuizTimeLimit" value="10" min="1" max="180" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Instructions Excerpt</label>
+                <input type="text" id="newQuizDescription" placeholder="Brief guidance for students before starting" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <!-- Dynamic Question Cards List -->
+            <div class="pt-4 border-t border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Quiz Questions (<span id="questionCounterBadge">0</span>)</h3>
+                <button type="button" onclick="addQuestionCard()" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>Add Question</span>
+                </button>
+              </div>
+
+              <div id="questionsBuilderContainer" class="space-y-6">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Save Quiz Bar -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+              <span id="quizBuilderError" class="text-xs text-rose-500 font-bold hidden"></span>
+              <button onclick="saveNewQuiz()" class="ml-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-200 flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Publish Quiz</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Existing Quizzes List -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+            <h3 class="text-base font-black text-slate-800 mb-1">Active Quizzes</h3>
+            <p class="text-xs text-slate-400 mb-4">Live tests available for students.</p>
+
+            <div id="adminExistingQuizzesList" class="space-y-3">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 4: STUDENT SUBMISSIONS & ANALYTICS -->
+    <!-- ========================================================= -->
+    <section id="adminSectionSubmissions" class="hidden">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-black text-slate-800">Student Quiz Submissions</h2>
+            <p class="text-xs text-slate-500">Track individual test scores, percentages, and inspected answer papers.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <select id="submissionQuizFilter" onchange="loadAdminSubmissions()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none">
+              <option value="all">All Quizzes</option>
+            </select>
+            <button onclick="loadAdminSubmissions()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submissions Table -->
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Student Name</th>
+                <th class="py-3 px-4">Quiz Title</th>
+                <th class="py-3 px-4">Score</th>
+                <th class="py-3 px-4">Grade %</th>
+                <th class="py-3 px-4">Submitted At</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminSubmissionsTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: DETAILED SUBMISSION ANSWER SHEET INSPECTOR -->
+  <!-- ========================================================= -->
+  <div id="submissionDetailModal" class="fixed inset-0 z-50 hidden modal-backdrop-blur flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 my-auto">
+      <div class="px-6 py-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div>
+          <h3 id="subModalStudentName" class="text-base font-bold">Student Submission Sheet</h3>
+          <p id="subModalQuizTitle" class="text-xs text-slate-400">Quiz Title</p>
+        </div>
+        <button onclick="closeModal('submissionDetailModal')" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto max-h-[75vh]">
+        <!-- Top Score Bar -->
+        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase">Student Score</div>
+            <div id="subModalScoreText" class="text-xl font-black text-slate-900">30 / 30</div>
+          </div>
+          <div id="subModalPctBadge" class="px-3.5 py-1.5 rounded-xl font-black text-sm bg-emerald-100 text-emerald-700">
+            100%
+          </div>
+        </div>
+
+        <!-- Answers List -->
+        <div id="subModalAnswersList" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
+        <button onclick="closeModal('submissionDetailModal')" class="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin JavaScript -->
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>

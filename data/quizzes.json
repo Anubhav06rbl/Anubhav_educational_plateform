@@ -1,0 +1,155 @@
+[
+  {
+    "id": "quiz_1",
+    "title": "Modern Physics & Quantum Mechanics Mastery Test",
+    "category": "Physics",
+    "chapter": "Unit 3: Modern Physics",
+    "description": "Assess your understanding of blackbody radiation, the photoelectric effect, and matter wave wavelengths.",
+    "time_limit_minutes": 10,
+    "total_points": 30,
+    "created_at": "2026-09-21T10:00:00Z",
+    "questions": [
+      {
+        "id": "q1_1",
+        "question": "Who postulated in 1900 that radiant energy is emitted and absorbed only in discrete packets called quanta?",
+        "options": [
+          "Albert Einstein",
+          "Max Planck",
+          "Erwin Schr\u00f6dinger",
+          "Niels Bohr"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Max Planck introduced the quantum hypothesis to resolve the ultraviolet catastrophe of blackbody radiation."
+      },
+      {
+        "id": "q1_2",
+        "question": "In the photoelectric effect, what happens when the intensity of incident light increases while its frequency stays constant above threshold?",
+        "options": [
+          "The maximum kinetic energy of emitted photoelectrons increases",
+          "The work function of the metal decreases",
+          "The number of photoelectrons emitted per second increases",
+          "The threshold frequency increases proportionally"
+        ],
+        "correct_option_index": 2,
+        "points": 10,
+        "explanation": "Light intensity is proportional to photon flux. More photons yield more emitted electrons, but each electron's kinetic energy is dictated solely by photon energy (frequency)."
+      },
+      {
+        "id": "q1_3",
+        "question": "According to the de Broglie relationship (\u03bb = h / p), what happens to a particle's wavelength if its momentum doubles?",
+        "options": [
+          "It doubles",
+          "It is halved",
+          "It quadruples",
+          "It remains unchanged"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Wavelength is inversely proportional to momentum: if momentum p doubles, \u03bb becomes \u03bb/2."
+      }
+    ]
+  },
+  {
+    "id": "quiz_2",
+    "title": "Data Structures & Big-O Computational Complexity Quiz",
+    "category": "Computer Science",
+    "chapter": "Module 1: Algorithms & Data Structures",
+    "description": "Evaluate your proficiency in asymptotic time complexities, tree traversals, and search algorithms.",
+    "time_limit_minutes": 15,
+    "total_points": 40,
+    "created_at": "2026-09-22T14:30:00Z",
+    "questions": [
+      {
+        "id": "q2_1",
+        "question": "What is the worst-case time complexity of searching for an element in an unbalanced, degenerate Binary Search Tree?",
+        "options": [
+          "O(1)",
+          "O(log n)",
+          "O(n)",
+          "O(n log n)"
+        ],
+        "correct_option_index": 2,
+        "points": 10,
+        "explanation": "In an unbalanced BST (e.g. elements inserted in sorted order), the tree degenerates into a linked list where search is O(n)."
+      },
+      {
+        "id": "q2_2",
+        "question": "Which data structure provides average O(1) time complexity for insertion, deletion, and lookup operations?",
+        "options": [
+          "Hash Table / Map",
+          "Binary Search Tree",
+          "Red-Black Tree",
+          "Min Heap"
+        ],
+        "correct_option_index": 0,
+        "points": 10,
+        "explanation": "A hash table maps keys to array buckets via a hashing function, achieving average O(1) performance."
+      },
+      {
+        "id": "q2_3",
+        "question": "Which sorting algorithm maintains a guaranteed worst-case time complexity of O(n log n) by using the divide-and-conquer strategy?",
+        "options": [
+          "QuickSort",
+          "MergeSort",
+          "BubbleSort",
+          "InsertionSort"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "MergeSort recursively halves the array and merges sorted halves, always running in O(n log n) even in the worst case."
+      },
+      {
+        "id": "q2_4",
+        "question": "What tree traversal sequence visits nodes in the order: Left Subtree -> Root Node -> Right Subtree?",
+        "options": [
+          "Pre-order Traversal",
+          "Post-order Traversal",
+          "In-order Traversal",
+          "Level-order Traversal"
+        ],
+        "correct_option_index": 2,
+        "points": 10,
+        "explanation": "In-order traversal visits left subtree, current node, then right subtree. On a BST, this yields keys in ascending sorted order."
+      }
+    ]
+  },
+  {
+    "id": "quiz_3",
+    "title": "Molecular Biology & DNA Replication Checkpoint",
+    "category": "Biology",
+    "chapter": "Chapter 7: Molecular Genetics",
+    "description": "Test your mastery over DNA replication enzymes, Okazaki fragments, and synthesis polarity.",
+    "time_limit_minutes": 10,
+    "total_points": 20,
+    "created_at": "2026-09-23T12:00:00Z",
+    "questions": [
+      {
+        "id": "q3_1",
+        "question": "Which enzyme is responsible for unwinding the double-stranded DNA helix at the replication fork?",
+        "options": [
+          "DNA Ligase",
+          "DNA Helicase",
+          "RNA Primase",
+          "Topoisomerase"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "DNA Helicase breaks the hydrogen bonds holding the paired nitrogenous bases together, creating the replication fork."
+      },
+      {
+        "id": "q3_2",
+        "question": "In what direction does DNA Polymerase synthesize the new complementary daughter strand?",
+        "options": [
+          "3' to 5' direction only",
+          "5' to 3' direction only",
+          "Bidirectionally without restriction",
+          "From either terminus depending on temperature"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "DNA Polymerase can only add free nucleotides to the 3' hydroxyl (-OH) end of a growing polynucleotide chain, synthesizing 5' -> 3'."
+      }
+    ]
+  }
+]
