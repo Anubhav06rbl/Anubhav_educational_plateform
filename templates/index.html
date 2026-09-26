@@ -132,8 +132,45 @@
 
     <!-- TAB 1: MATERIALS EXPLORER -->
     <section id="materialsSection" class="block">
-      <!-- Filter Bar Controls -->
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+      
+      <!-- BRANCH SELECTOR TABS -->
+      <div class="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm mb-4">
+        <div class="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none" id="branchSelectorTabs">
+          <button onclick="setBranchFilter('all')" data-branch="all" class="branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-shapes"></i>
+            <span>All Streams</span>
+          </button>
+          <button onclick="setBranchFilter('Computer Science')" data-branch="Computer Science" class="branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-laptop-code text-indigo-500"></i>
+            <span>Computer Science (CS)</span>
+          </button>
+          <button onclick="setBranchFilter('Science')" data-branch="Science" class="branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-atom text-blue-500"></i>
+            <span>Science</span>
+          </button>
+          <button onclick="setBranchFilter('Humanities')" data-branch="Humanities" class="branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-landmark text-amber-500"></i>
+            <span>Humanities</span>
+          </button>
+          <button onclick="setBranchFilter('Other')" data-branch="Other" class="branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 flex items-center space-x-2 shrink-0">
+            <i class="fa-solid fa-globe text-emerald-500"></i>
+            <span>Other (Hindi / English)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- DYNAMIC SUB-CATEGORY PILLS -->
+      <div id="subCategoryPillsBar" class="bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100 mb-6 flex items-center space-x-2 overflow-x-auto scrollbar-none">
+        <span class="text-[11px] font-black text-indigo-900 uppercase tracking-wider shrink-0 mr-1 flex items-center">
+          <i class="fa-solid fa-filter text-indigo-500 mr-1.5"></i>Sub-Category:
+        </span>
+        <div id="subCategoryPillsContainer" class="flex items-center space-x-2">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Resource Type Filter & Search Bar Controls -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <!-- Resource Type Filter Pills -->
           <div class="flex items-center space-x-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none" id="typeFilterPills">
@@ -157,13 +194,12 @@
             </button>
           </div>
 
-          <!-- Subject / Category Dropdown -->
-          <div class="flex items-center space-x-3 shrink-0">
-            <label for="categorySelect" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject:</label>
-            <select id="categorySelect" onchange="handleCategoryChange(event)" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-              <option value="all">All Subjects</option>
-              <!-- Filled dynamically by JavaScript -->
-            </select>
+          <!-- Active Filter Reset Button -->
+          <div class="flex items-center space-x-2 shrink-0">
+            <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-indigo-600 font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors flex items-center space-x-1">
+              <i class="fa-solid fa-arrow-rotate-left text-[11px]"></i>
+              <span>Reset Filters</span>
+            </button>
           </div>
         </div>
       </div>
@@ -208,6 +244,39 @@
       <!-- Quiz Cards Grid -->
       <div id="quizzesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- FOUNDER & PLATFORM LEAD SPOTLIGHT -->
+    <section class="mt-12 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+      <div class="flex items-center space-x-5">
+        <div class="relative shrink-0">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-sky-500 p-1 shadow-lg shadow-indigo-100 flex items-center justify-center">
+            <img id="founderPhotoImg" src="/static/images/anubhav_founder.jpg" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Anubhav&background=4f46e5&color=fff&size=128&bold=true'" alt="Anubhav - Founder & Super Admin" class="w-full h-full object-cover rounded-xl" />
+          </div>
+          <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white text-[10px]" title="Super Admin Verified">
+            <i class="fa-solid fa-check"></i>
+          </span>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <i class="fa-solid fa-crown text-amber-500 mr-1"></i>Platform Founder & Lead
+            </span>
+            <span class="text-xs text-slate-400">• Super Admin</span>
+          </div>
+          <h3 class="text-xl font-black text-slate-900 mt-1">Anubhav</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-xl leading-relaxed">
+            Leading the development of EduSphere Learning Hub. Curating open educational resources across Computer Science (ML, Python, GenAI), Sciences, Humanities, and Language studies for students and educators worldwide.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 shrink-0">
+        <a href="/admin" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center space-x-2">
+          <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+          <span>Admin Portal</span>
+        </a>
       </div>
     </section>
 

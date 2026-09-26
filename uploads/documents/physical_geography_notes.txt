@@ -1,0 +1,24 @@
+===================================================================
+PHYSICAL GEOGRAPHY: PLATE TECTONICS & CLIMATIC SYSTEMS
+Department of Humanities | Earth Systems Science
+===================================================================
+
+1. PLATE TECTONICS THEORY
+-------------------------
+The Earth's lithosphere is divided into rigid tectonic plates floating on the
+semi-fluid asthenosphere.
+- Convergent Boundaries: Plates collide. Oceanic-continental subduction forms
+  volcanic arcs (e.g. Andes); continental-continental collision builds fold
+  mountains (e.g. Himalayas).
+- Divergent Boundaries: Plates pull apart, creating mid-ocean ridges (e.g. Mid-Atlantic
+  Ridge) and rift valleys (East African Rift).
+- Transform Boundaries: Plates slide horizontally past each other, generating
+  shallow earthquakes (e.g. San Andreas Fault).
+
+2. ATMOSPHERIC CIRCULATION & PRESSURE BELTS
+-------------------------------------------
+- Hadley Cells: Warm air rises at the Intertropical Convergence Zone (ITCZ), creating
+  the Equatorial Low-Pressure trough, and sinks at 30° N/S (Subtropical Highs).
+- Ferrel Cells & Polar Cells: Drive Mid-Latitude Westerlies and Polar Easterlies.
+- Coriolis Effect: Deflects winds to the right in the Northern Hemisphere and to
+  the left in the Southern Hemisphere.

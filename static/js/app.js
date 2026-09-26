@@ -7,9 +7,17 @@ let state = {
   quizzes: [],
   categories: [],
   currentTab: 'materials',
+  activeBranchFilter: 'all',
+  activeSubCategoryFilter: 'all',
   activeTypeFilter: 'all',
   activeCategoryFilter: 'all',
   searchQuery: '',
+  taxonomy: {
+    "Computer Science": ["Machine Learning (ML)", "Python", "Generative AI (GenAI)"],
+    "Science": ["Physics", "Chemistry", "Biology"],
+    "Humanities": ["History", "Geography", "Political Science"],
+    "Other": ["Hindi", "English"]
+  },
   
   // Media Viewer states
   txtFontSize: 15,
@@ -18,7 +26,7 @@ let state = {
   // Quiz taking state
   activeQuiz: null,
   activeQuestionIndex: 0,
-  studentAnswers: {}, // { question_id: selected_index }
+  studentAnswers: {},
   studentName: '',
   studentEmail: ''
 };
@@ -27,6 +35,7 @@ let state = {
 document.addEventListener('DOMContentLoaded', () => {
   fetchPlatformStats();
   fetchCategories();
+  renderSubCategoryPills();
   loadMaterials();
   loadQuizzes();
   setupAudioListeners();
@@ -81,22 +90,74 @@ async function fetchCategories() {
     const res = await fetch('/api/categories');
     const json = await res.json();
     if (json.status === 'success') {
-      state.categories = json.data;
-      
-      const catSelect = document.getElementById('categorySelect');
-      const quizCatSelect = document.getElementById('quizCategorySelect');
-      
-      let optionsHtml = '<option value="all">All Subjects</option>';
-      json.data.forEach(c => {
-        optionsHtml += `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)} (${c.count})</option>`;
-      });
-      
-      catSelect.innerHTML = optionsHtml;
-      quizCatSelect.innerHTML = '<option value="all">All Subjects</option>' + json.data.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
+      if (json.taxonomy) {
+        state.taxonomy = json.taxonomy;
+      }
+      renderSubCategoryPills();
     }
   } catch (err) {
     console.error('Failed to load categories:', err);
   }
+}
+
+// ==========================================
+// BRANCH & SUB-CATEGORY NAVIGATION
+// ==========================================
+
+function setBranchFilter(branch) {
+  state.activeBranchFilter = branch;
+  state.activeSubCategoryFilter = 'all';
+
+  document.querySelectorAll('.branch-tab').forEach(btn => {
+    if (btn.getAttribute('data-branch') === branch) {
+      btn.className = "branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center space-x-2 shrink-0";
+    } else {
+      btn.className = "branch-tab px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 flex items-center space-x-2 shrink-0";
+    }
+  });
+
+  renderSubCategoryPills();
+  loadMaterials();
+}
+
+function renderSubCategoryPills() {
+  const container = document.getElementById('subCategoryPillsContainer');
+  if (!container) return;
+
+  let subList = [];
+  if (state.activeBranchFilter === 'all') {
+    subList = [
+      "Machine Learning (ML)", "Python", "Generative AI (GenAI)",
+      "Physics", "Chemistry", "Biology",
+      "History", "Geography", "Political Science",
+      "Hindi", "English"
+    ];
+  } else {
+    subList = state.taxonomy[state.activeBranchFilter] || [];
+  }
+
+  let pillsHtml = `
+    <button onclick="setSubCategoryFilter('all')" class="sub-pill px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 ${state.activeSubCategoryFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}">
+      All
+    </button>
+  `;
+
+  subList.forEach(sub => {
+    const isSelected = (state.activeSubCategoryFilter === sub);
+    pillsHtml += `
+      <button onclick="setSubCategoryFilter('${escapeHtml(sub)}')" class="sub-pill px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 ${isSelected ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'}">
+        ${escapeHtml(sub)}
+      </button>
+    `;
+  });
+
+  container.innerHTML = pillsHtml;
+}
+
+function setSubCategoryFilter(sub) {
+  state.activeSubCategoryFilter = sub;
+  renderSubCategoryPills();
+  loadMaterials();
 }
 
 // ==========================================
@@ -108,11 +169,14 @@ async function loadMaterials() {
   const emptyState = document.getElementById('noMaterialsState');
   
   let url = `/api/materials?`;
+  if (state.activeBranchFilter !== 'all') {
+    url += `branch=${encodeURIComponent(state.activeBranchFilter)}&`;
+  }
+  if (state.activeSubCategoryFilter !== 'all') {
+    url += `sub_category=${encodeURIComponent(state.activeSubCategoryFilter)}&`;
+  }
   if (state.activeTypeFilter !== 'all') {
     url += `resource_type=${encodeURIComponent(state.activeTypeFilter)}&`;
-  }
-  if (state.activeCategoryFilter !== 'all') {
-    url += `category=${encodeURIComponent(state.activeCategoryFilter)}&`;
   }
   if (state.searchQuery.trim()) {
     url += `search=${encodeURIComponent(state.searchQuery.trim())}&`;
@@ -175,9 +239,14 @@ function createMaterialCardHtml(mat) {
             <i class="fa-solid ${meta.icon}"></i>
             <span>${meta.label}</span>
           </span>
-          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-            ${escapeHtml(mat.category || 'General')}
-          </span>
+          <div class="flex items-center space-x-1">
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-900 text-white">
+              ${escapeHtml(mat.branch || 'General')}
+            </span>
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              ${escapeHtml(mat.sub_category || mat.category || 'Topic')}
+            </span>
+          </div>
         </div>
 
         <!-- Title -->

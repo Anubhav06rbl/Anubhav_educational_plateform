@@ -182,12 +182,40 @@ def test_one_time_passcode_lifecycle(admin_token):
     # Cleanup
     client.delete(f"/api/materials/{mat_id}", headers={"Authorization": f"Bearer {admin_token}"})
 
+def test_branch_taxonomy_filtering():
+    # 1. Test GET /api/categories returns 4 branches
+    res = client.get("/api/categories")
+    assert res.status_code == 200
+    res_json = res.json()
+    taxonomy = res_json.get("taxonomy", {})
+    assert "Computer Science" in taxonomy
+    assert "Science" in taxonomy
+    assert "Humanities" in taxonomy
+    assert "Other" in taxonomy
+    print("[PASS] GET /api/categories returns all 4 branches with sub-categories")
+
+    # 2. Test GET /api/materials?branch=Science
+    res_sci = client.get("/api/materials?branch=Science")
+    assert res_sci.status_code == 200
+    materials_sci = res_sci.json()["data"]
+    assert all(m.get("branch") == "Science" for m in materials_sci)
+    assert len(materials_sci) > 0
+    print("[PASS] Branch filter 'Science' returned matching materials")
+
+    # 3. Test GET /api/materials?branch=Computer Science&sub_category=Python
+    res_py = client.get("/api/materials?branch=Computer%20Science&sub_category=Python")
+    assert res_py.status_code == 200
+    materials_py = res_py.json()["data"]
+    assert all("python" in m.get("sub_category", "").lower() for m in materials_py)
+    print("[PASS] Sub-category filter 'Python' in 'Computer Science' verified")
+
 if __name__ == "__main__":
     print("Running EduSphere Access Control & Privacy Test Suite...\n")
     test_public_pages()
+    test_branch_taxonomy_filtering()
     admin_token = test_auth_and_super_admin()
     test_upload_privacy_protection(admin_token)
     test_external_link_upload(admin_token)
     test_one_time_teacher_lifecycle(admin_token)
     test_one_time_passcode_lifecycle(admin_token)
-    print("\nALL PRIVACY & ACCESS CONTROL TESTS PASSED (100% SUCCESS)!")
+    print("\nALL PRIVACY, TAXONOMY & ACCESS CONTROL TESTS PASSED (100% SUCCESS)!")

@@ -1,0 +1,26 @@
+===================================================================
+POLITICAL SCIENCE: CONSTITUTIONAL FRAMEWORKS & DEMOCRACY
+Department of Humanities | Foundations of Governance
+===================================================================
+
+1. FOUNDATIONAL POLITICAL THEORIES
+----------------------------------
+- Social Contract Theory: Thomas Hobbes (Leviathan), John Locke (Two Treatises of
+  Government), and Jean-Jacques Rousseau (The Social Contract).
+- Separation of Powers (Montesquieu): Division among Legislative (law-making),
+  Executive (law-enforcing), and Judicial (law-interpreting) branches.
+- Checks and Balances: Prevents despotic concentration of authority.
+
+2. FORMS OF GOVERNMENT
+-----------------------
+- Parliamentary Democracy: Executive is drawn directly from and accountable to
+  the legislature (e.g. United Kingdom, India). Prime Minister is head of government.
+- Presidential System: Executive is independent of the legislature with a fixed
+  term and separate popular mandate (e.g. United States).
+- Federalism vs Unitary States: Division of sovereignty between central government
+  and federated states/provinces.
+
+3. FUNDAMENTAL RIGHTS & RULE OF LAW
+-----------------------------------
+- Rule of Law (A.V. Dicey): Supremacy of law, equality before the law, and
+  protection of individual liberties against arbitrary power.

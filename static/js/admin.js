@@ -14,9 +14,40 @@ let adminState = {
   builderQuestions: []
 };
 
+const BRANCH_TAXONOMY = {
+  "Computer Science": ["Machine Learning (ML)", "Python", "Generative AI (GenAI)"],
+  "Science": ["Physics", "Chemistry", "Biology"],
+  "Humanities": ["History", "Geography", "Political Science"],
+  "Other": ["Hindi", "English"]
+};
+
+function handleAdminBranchChange(branch) {
+  const subSelect = document.getElementById('uploadSubCategory');
+  const catInput = document.getElementById('uploadCategory');
+  if (!subSelect) return;
+  const list = BRANCH_TAXONOMY[branch] || [];
+  subSelect.innerHTML = list.map(sub => `<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join('');
+  if (list.length > 0 && catInput) {
+    catInput.value = list[0];
+  }
+}
+
+function handleQuizBranchChange(branch) {
+  const subSelect = document.getElementById('newQuizSubCategory');
+  const catInput = document.getElementById('newQuizCategory');
+  if (!subSelect) return;
+  const list = BRANCH_TAXONOMY[branch] || [];
+  subSelect.innerHTML = list.map(sub => `<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join('');
+  if (list.length > 0 && catInput) {
+    catInput.value = list[0];
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupDropZone();
   addQuestionCard();
+  handleAdminBranchChange('Computer Science');
+  handleQuizBranchChange('Computer Science');
 
   // Check existing session
   if (adminState.authToken) {
@@ -451,6 +482,7 @@ async function handleMaterialUpload(e) {
       feedback.className = "text-xs font-bold text-emerald-600 block";
       
       document.getElementById('uploadMaterialForm').reset();
+      handleAdminBranchChange(document.getElementById('uploadBranch').value);
       clearSelectedFile(new Event('dummy'));
       switchUploadSourceMode('file');
       fetchAdminStats();
@@ -724,8 +756,16 @@ async function saveNewQuiz() {
     }
   }
 
+  const branchEl = document.getElementById('newQuizBranch');
+  const subCatEl = document.getElementById('newQuizSubCategory');
+  const branch = branchEl ? branchEl.value : 'Computer Science';
+  const subCategory = subCatEl ? subCatEl.value : '';
+  const category = subCategory || (document.getElementById('newQuizCategory') ? document.getElementById('newQuizCategory').value.trim() : '');
+
   const payload = {
     title,
+    branch,
+    sub_category: subCategory,
     category,
     chapter,
     description: description || `Assessment test for ${chapter}`,

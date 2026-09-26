@@ -1,0 +1,33 @@
+===================================================================
+GENERATIVE AI, LLMS & TRANSFORMER ARCHITECTURES
+Department of Computer Science | Advanced AI Specialization
+===================================================================
+
+1. THE TRANSFORMER REVOLUTION ("Attention Is All You Need", 2017)
+-----------------------------------------------------------------
+Traditional RNNs and LSTMs suffered from sequential bottleneck and
+vanishing gradients over long contexts. Transformers introduced:
+
+Self-Attention Equation:
+    Attention(Q, K, V) = softmax((Q * K^T) / sqrt(d_k)) * V
+
+Where:
+- Q (Query): What the current token is seeking
+- K (Key): What each other token contains
+- V (Value): The informational payload of each token
+- d_k: Dimension of the keys (prevents exploding dot products)
+
+2. CORE LLM PARADIGMS
+---------------------
+- Autoregressive Models (GPT series): Causal decoder-only, predicts next token
+- Autoencoding Models (BERT series): Masked encoder-only, bidirectional context
+- Sequence-to-Sequence (T5, BART): Encoder-decoder for translation/summarization
+
+3. MODERN GENAI TECHNIQUES
+--------------------------
+- RAG (Retrieval-Augmented Generation): Grounds model generation in external
+  knowledge bases using vector similarity search (cosine distance on embeddings).
+- Fine-Tuning with LoRA (Low-Rank Adaptation): Freezes base model weights and
+  injects trainable rank decomposition matrices, drastically reducing GPU memory.
+- RLHF (Reinforcement Learning from Human Feedback): Uses PPO/DPO to align
+  models with human preferences for safety, helpfulness, and tone.

@@ -1,0 +1,27 @@
+===================================================================
+ORGANIC CHEMISTRY: REACTION MECHANISMS & PERIODICITY
+Department of Chemical Sciences | Unit 2 Revision Notes
+===================================================================
+
+1. NUCLEOPHILIC SUBSTITUTION: SN1 VS SN2
+-----------------------------------------
+Property         | SN1 (Substitution Nucleophilic Unimolecular) | SN2 (Bimolecular)
+-----------------|---------------------------------------------|------------------
+Mechanism Steps  | 2 steps (Carbocation intermediate formed)   | 1 concerted step
+Kinetics         | Rate = k[Substrate]                         | Rate = k[Substrate][Nu]
+Substrate Pref.  | Tertiary (3°) > Secondary (2°)             | Methyl > Primary (1°) > Secondary
+Stereochemistry  | Racemization (mixture of enantiomers)       | Complete inversion (Walden)
+Solvent          | Polar protic (e.g. H2O, EtOH)               | Polar aprotic (e.g. Acetone, DMSO)
+
+2. ELECTROPHILIC AROMATIC SUBSTITUTION (EAS)
+--------------------------------------------
+Benzene rings react with electrophiles (E+) through arenium ion intermediates:
+- Activating Groups (ortho/para directors): -OH, -NH2, -OCH3, -CH3
+- Deactivating Groups (meta directors): -NO2, -CN, -COOH, -CHO
+- Halogens (-Cl, -Br): Deactivating yet ortho/para directing due to resonance.
+
+3. CHEMICAL EQUILIBRIUM & LE CHATELIER'S PRINCIPLE
+--------------------------------------------------
+If a system at dynamic equilibrium is subjected to stress (concentration,
+temperature, pressure), the equilibrium shifts in the direction that minimizes
+the imposed perturbation.

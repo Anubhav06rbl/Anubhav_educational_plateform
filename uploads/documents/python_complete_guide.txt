@@ -1,0 +1,45 @@
+===================================================================
+PYTHON 3 COMPREHENSIVE PROGRAMMING GUIDE
+Department of Computer Science | Unit 1: Core to Advanced Python
+===================================================================
+
+1. CORE DATA STRUCTURES & COMPLEXITIES
+--------------------------------------
+- Lists (Dynamic Arrays): Append O(1), Insert/Delete O(n), Indexing O(1)
+- Tuples (Immutable Sequences): Memory-efficient, hashable for dict keys
+- Dictionaries (Hash Maps): Average O(1) lookup, insertion, deletion
+- Sets: Unique unordered elements, O(1) membership checking (x in s)
+
+2. LIST COMPREHENSIONS & GENERATORS
+-----------------------------------
+# List comprehension (creates list in memory):
+squares = [x**2 for x in range(10) if x % 2 == 0]
+
+# Generator expression (lazy evaluation for large streams):
+gen_squares = (x**2 for x in range(10**6))
+# Memory usage is constant O(1)!
+
+3. DECORATORS & HIGHER-ORDER FUNCTIONS
+--------------------------------------
+A decorator wraps a function to modify or log its behavior:
+
+def timer_decorator(func):
+    import time
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} executed in {time.time() - start:.4f}s")
+        return result
+    return wrapper
+
+@timer_decorator
+def compute_heavy_task():
+    return sum(i * i for i in range(100000))
+
+4. OBJECT-ORIENTED PROGRAMMING (OOP)
+------------------------------------
+Class inheritance, polymorphism, and encapsulated dunder methods:
+- __init__(self): Constructor
+- __str__(self): User-friendly string representation
+- __repr__(self): Unambiguous developer representation
+- @classmethod and @staticmethod decorators

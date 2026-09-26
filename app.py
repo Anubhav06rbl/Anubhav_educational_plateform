@@ -162,6 +162,8 @@ class QuestionItem(BaseModel):
 
 class CreateQuizRequest(BaseModel):
     title: str
+    branch: Optional[str] = "Computer Science"
+    sub_category: Optional[str] = None
     category: str
     chapter: str
     description: str
@@ -451,6 +453,8 @@ async def revoke_one_time_pass(pass_id: str, authorization: Optional[str] = Head
 
 @app.get("/api/materials")
 async def get_materials(
+    branch: Optional[str] = Query(None),
+    sub_category: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     resource_type: Optional[str] = Query(None),
     search: Optional[str] = Query(None)
@@ -458,8 +462,18 @@ async def get_materials(
     materials = read_json(MATERIALS_FILE, [])
     
     filtered = materials
-    if category and category.lower() != "all":
-        filtered = [m for m in filtered if m.get("category", "").lower() == category.lower()]
+    if branch and branch.lower() != "all":
+        filtered = [m for m in filtered if m.get("branch", "").lower() == branch.lower()]
+
+    sub = sub_category or category
+    if sub and sub.lower() != "all":
+        sub_l = sub.lower()
+        filtered = [
+            m for m in filtered 
+            if m.get("sub_category", "").lower() == sub_l
+            or m.get("category", "").lower() == sub_l
+            or sub_l in m.get("sub_category", "").lower()
+        ]
         
     if resource_type and resource_type.lower() != "all":
         filtered = [m for m in filtered if m.get("resource_type", "").lower() == resource_type.lower()]
@@ -473,6 +487,8 @@ async def get_materials(
             or s in m.get("description", "").lower()
             or any(s in tag.lower() for tag in m.get("tags", []))
             or s in m.get("category", "").lower()
+            or s in m.get("branch", "").lower()
+            or s in m.get("sub_category", "").lower()
         ]
         
     # Sort newest first
@@ -492,7 +508,9 @@ async def upload_material(
     file: Optional[UploadFile] = File(None),
     external_url: Optional[str] = Form(None),
     title: str = Form(...),
-    category: str = Form(...),
+    branch: Optional[str] = Form("Computer Science"),
+    sub_category: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
     chapter: str = Form(...),
     description: str = Form(...),
     tags: str = Form(""),
@@ -587,10 +605,14 @@ async def upload_material(
 
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
     material_id = f"mat_{uuid.uuid4().hex[:10]}"
+    chosen_branch = branch.strip() if branch else "Computer Science"
+    chosen_sub = (sub_category.strip() if sub_category else (category.strip() if category else "General"))
     material_entry = {
         "id": material_id,
         "title": title.strip(),
-        "category": category.strip(),
+        "branch": chosen_branch,
+        "sub_category": chosen_sub,
+        "category": chosen_sub,
         "chapter": chapter.strip(),
         "resource_type": chosen_type,
         "description": description.strip(),
@@ -682,13 +704,33 @@ async def download_material(material_id: str):
 @app.get("/api/categories")
 async def get_categories():
     materials = read_json(MATERIALS_FILE, [])
-    category_counts = {}
+    
+    # Official branch hierarchy requested by user
+    taxonomy = {
+        "Computer Science": ["Machine Learning (ML)", "Python", "Generative AI (GenAI)"],
+        "Science": ["Physics", "Chemistry", "Biology"],
+        "Humanities": ["History", "Geography", "Political Science"],
+        "Other": ["Hindi", "English"]
+    }
+    
+    # Calculate counts per branch and sub-category
+    branch_counts = {b: 0 for b in taxonomy}
+    sub_counts = {}
     for m in materials:
-        cat = m.get("category", "General")
-        category_counts[cat] = category_counts.get(cat, 0) + 1
+        b = m.get("branch", "Other")
+        if b in branch_counts:
+            branch_counts[b] += 1
+        sub = m.get("sub_category") or m.get("category", "General")
+        sub_counts[sub] = sub_counts.get(sub, 0) + 1
         
-    cat_list = [{"name": cat, "count": count} for cat, count in sorted(category_counts.items())]
-    return {"status": "success", "data": cat_list}
+    flat_list = [{"name": s, "count": c} for s, c in sorted(sub_counts.items())]
+    return {
+        "status": "success", 
+        "taxonomy": taxonomy,
+        "branch_counts": branch_counts,
+        "sub_counts": sub_counts,
+        "data": flat_list
+    }
 
 @app.get("/api/stats")
 async def get_platform_stats():
@@ -722,10 +764,24 @@ async def get_platform_stats():
 # ==========================================
 
 @app.get("/api/quizzes")
-async def get_quizzes(category: Optional[str] = Query(None)):
+async def get_quizzes(
+    branch: Optional[str] = Query(None),
+    sub_category: Optional[str] = Query(None),
+    category: Optional[str] = Query(None)
+):
     quizzes = read_json(QUIZZES_FILE, [])
-    if category and category.lower() != "all":
-        quizzes = [q for q in quizzes if q.get("category", "").lower() == category.lower()]
+    if branch and branch.lower() != "all":
+        quizzes = [q for q in quizzes if q.get("branch", "").lower() == branch.lower()]
+        
+    sub = sub_category or category
+    if sub and sub.lower() != "all":
+        sub_l = sub.lower()
+        quizzes = [
+            q for q in quizzes 
+            if q.get("sub_category", "").lower() == sub_l
+            or q.get("category", "").lower() == sub_l
+            or sub_l in q.get("sub_category", "").lower()
+        ]
         
     sanitized = []
     for q in quizzes:
@@ -740,7 +796,9 @@ async def get_quizzes(category: Optional[str] = Query(None)):
         sanitized.append({
             "id": q["id"],
             "title": q["title"],
-            "category": q["category"],
+            "branch": q.get("branch", "Other"),
+            "sub_category": q.get("sub_category", q.get("category")),
+            "category": q.get("category"),
             "chapter": q["chapter"],
             "description": q["description"],
             "time_limit_minutes": q.get("time_limit_minutes", 10),
@@ -822,10 +880,14 @@ async def create_quiz(payload: CreateQuizRequest, authorization: Optional[str] =
         })
         
     quiz_id = f"quiz_{uuid.uuid4().hex[:8]}"
+    chosen_branch = (payload.branch.strip() if payload.branch else "Computer Science")
+    chosen_sub = (payload.sub_category.strip() if payload.sub_category else payload.category.strip())
     quiz_entry = {
         "id": quiz_id,
         "title": payload.title.strip(),
-        "category": payload.category.strip(),
+        "branch": chosen_branch,
+        "sub_category": chosen_sub,
+        "category": chosen_sub,
         "chapter": payload.chapter.strip(),
         "description": payload.description.strip(),
         "time_limit_minutes": max(1, payload.time_limit_minutes),

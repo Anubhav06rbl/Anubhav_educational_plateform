@@ -299,16 +299,23 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subject / Category <span class="text-rose-500">*</span></label>
-              <input type="text" id="uploadCategory" name="category" placeholder="e.g. Physics, Computer Science, Biology" list="categorySuggestions" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
-              <datalist id="categorySuggestions">
-                <option value="Physics"></option>
-                <option value="Computer Science"></option>
-                <option value="Biology"></option>
-                <option value="Mathematics"></option>
-                <option value="Chemistry"></option>
-                <option value="Astronomy"></option>
-              </datalist>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Academic Branch <span class="text-rose-500">*</span></label>
+              <select id="uploadBranch" name="branch" onchange="handleAdminBranchChange(this.value)" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
+                <option value="Computer Science">💻 Computer Science</option>
+                <option value="Science">🔬 Science</option>
+                <option value="Humanities">📚 Humanities</option>
+                <option value="Other">🌐 Other (Languages)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sub-Category / Subject <span class="text-rose-500">*</span></label>
+              <select id="uploadSubCategory" name="sub_category" onchange="document.getElementById('uploadCategory').value=this.value" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
+                <option value="Machine Learning (ML)">Machine Learning (ML)</option>
+                <option value="Python">Python</option>
+                <option value="Generative AI (GenAI)">Generative AI (GenAI)</option>
+              </select>
+              <input type="hidden" id="uploadCategory" name="category" value="Machine Learning (ML)" />
             </div>
 
             <div>
@@ -409,8 +416,22 @@
                 <input type="text" id="newQuizTitle" placeholder="e.g. Modern Physics & Quantum Mechanics Mastery Test" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subject / Category <span class="text-rose-500">*</span></label>
-                <input type="text" id="newQuizCategory" placeholder="e.g. Physics" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Branch <span class="text-rose-500">*</span></label>
+                <select id="newQuizBranch" onchange="handleQuizBranchChange(this.value)" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="Computer Science">💻 Computer Science</option>
+                  <option value="Science">🔬 Science</option>
+                  <option value="Humanities">📚 Humanities</option>
+                  <option value="Other">🌐 Other (Languages)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sub-Category <span class="text-rose-500">*</span></label>
+                <select id="newQuizSubCategory" onchange="document.getElementById('newQuizCategory').value=this.value" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="Machine Learning (ML)">Machine Learning (ML)</option>
+                  <option value="Python">Python</option>
+                  <option value="Generative AI (GenAI)">Generative AI (GenAI)</option>
+                </select>
+                <input type="hidden" id="newQuizCategory" value="Machine Learning (ML)" />
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Chapter / Topic <span class="text-rose-500">*</span></label>

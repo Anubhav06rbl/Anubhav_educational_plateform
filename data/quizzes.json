@@ -1,43 +1,112 @@
 [
   {
-    "id": "quiz_1",
-    "title": "Modern Physics & Quantum Mechanics Mastery Test",
-    "category": "Physics",
-    "chapter": "Unit 3: Modern Physics",
-    "description": "Assess your understanding of blackbody radiation, the photoelectric effect, and matter wave wavelengths.",
+    "id": "quiz_cs_py",
+    "title": "Python Core & Advanced Programming Mastery Test",
+    "branch": "Computer Science",
+    "sub_category": "Python",
+    "category": "Computer Science",
+    "chapter": "Unit 1: Python Core",
+    "description": "Test your mastery of Python data structures, decorators, generator expressions, and complexity.",
     "time_limit_minutes": 10,
-    "total_points": 30,
-    "created_at": "2026-09-21T10:00:00Z",
+    "total_points": 20,
+    "created_at": "2026-09-26T16:00:00Z",
     "questions": [
       {
-        "id": "q1_1",
-        "question": "Who postulated in 1900 that radiant energy is emitted and absorbed only in discrete packets called quanta?",
+        "id": "q_py_1",
+        "question": "What is the average time complexity of looking up a key in a Python dictionary?",
         "options": [
-          "Albert Einstein",
-          "Max Planck",
-          "Erwin Schr\u00f6dinger",
-          "Niels Bohr"
-        ],
-        "correct_option_index": 1,
-        "points": 10,
-        "explanation": "Max Planck introduced the quantum hypothesis to resolve the ultraviolet catastrophe of blackbody radiation."
-      },
-      {
-        "id": "q1_2",
-        "question": "In the photoelectric effect, what happens when the intensity of incident light increases while its frequency stays constant above threshold?",
-        "options": [
-          "The maximum kinetic energy of emitted photoelectrons increases",
-          "The work function of the metal decreases",
-          "The number of photoelectrons emitted per second increases",
-          "The threshold frequency increases proportionally"
+          "O(n)",
+          "O(log n)",
+          "O(1)",
+          "O(n log n)"
         ],
         "correct_option_index": 2,
         "points": 10,
-        "explanation": "Light intensity is proportional to photon flux. More photons yield more emitted electrons, but each electron's kinetic energy is dictated solely by photon energy (frequency)."
+        "explanation": "Python dictionaries are implemented as hash tables, providing average O(1) time complexity for lookups."
       },
       {
-        "id": "q1_3",
-        "question": "According to the de Broglie relationship (\u03bb = h / p), what happens to a particle's wavelength if its momentum doubles?",
+        "id": "q_py_2",
+        "question": "What is the primary memory advantage of a generator expression over a list comprehension?",
+        "options": [
+          "Generators store elements in binary format",
+          "Generators evaluate items lazily on-the-fly, consuming constant O(1) memory",
+          "Generators allow multithreaded evaluation",
+          "Generators automatically cache results on disk"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Generators yield items one at a time using iterator protocol, avoiding memory allocation for the entire collection."
+      }
+    ]
+  },
+  {
+    "id": "quiz_cs_genai",
+    "title": "Generative AI & Transformer Architectures Assessment",
+    "branch": "Computer Science",
+    "sub_category": "GenAI",
+    "category": "Computer Science",
+    "chapter": "CS 502: Advanced GenAI",
+    "description": "Assess your knowledge of self-attention mechanisms, LLM architectures, and RAG systems.",
+    "time_limit_minutes": 10,
+    "total_points": 20,
+    "created_at": "2026-09-26T16:05:00Z",
+    "questions": [
+      {
+        "id": "q_genai_1",
+        "question": "In the self-attention equation Attention(Q, K, V) = softmax((Q*K^T)/sqrt(d_k))*V, why is the dot product scaled by sqrt(d_k)?",
+        "options": [
+          "To convert the matrix into square form",
+          "To prevent large values from pushing softmax into regions with extremely small gradients",
+          "To enforce symmetric attention matrices",
+          "To eliminate negative embedding weights"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Scaling by sqrt(d_k) prevents large dot products from causing vanishing gradients in the softmax function."
+      },
+      {
+        "id": "q_genai_2",
+        "question": "Which component is central to Retrieval-Augmented Generation (RAG) to ground LLMs in private documents?",
+        "options": [
+          "Vector embeddings and similarity search index",
+          "Convolutional feature extraction layers",
+          "Hidden Markov models",
+          "Recurrent cell hidden states"
+        ],
+        "correct_option_index": 0,
+        "points": 10,
+        "explanation": "RAG indexes documents as dense vector embeddings and retrieves semantically relevant passages via vector similarity."
+      }
+    ]
+  },
+  {
+    "id": "quiz_sci_phy",
+    "title": "Modern Physics & Quantum Concepts Test",
+    "branch": "Science",
+    "sub_category": "Physics",
+    "category": "Science",
+    "chapter": "Unit 3: Modern Physics",
+    "description": "Test your grasp on wave-particle duality, uncertainty principle, and photoelectric equations.",
+    "time_limit_minutes": 10,
+    "total_points": 20,
+    "created_at": "2026-09-21T10:00:00Z",
+    "questions": [
+      {
+        "id": "q_phy_1",
+        "question": "Who formulated the hypothesis that light is emitted or absorbed in discrete packets called quanta?",
+        "options": [
+          "Albert Einstein",
+          "Max Planck",
+          "Niels Bohr",
+          "Erwin Schrödinger"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Max Planck introduced the quantum hypothesis in 1900 to resolve the ultraviolet catastrophe."
+      },
+      {
+        "id": "q_phy_2",
+        "question": "According to de Broglie relationship (λ = h / p), what happens to wavelength when momentum doubles?",
         "options": [
           "It doubles",
           "It is halved",
@@ -46,109 +115,87 @@
         ],
         "correct_option_index": 1,
         "points": 10,
-        "explanation": "Wavelength is inversely proportional to momentum: if momentum p doubles, \u03bb becomes \u03bb/2."
+        "explanation": "Wavelength is inversely proportional to momentum: if momentum doubles, wavelength is halved."
       }
     ]
   },
   {
-    "id": "quiz_2",
-    "title": "Data Structures & Big-O Computational Complexity Quiz",
-    "category": "Computer Science",
-    "chapter": "Module 1: Algorithms & Data Structures",
-    "description": "Evaluate your proficiency in asymptotic time complexities, tree traversals, and search algorithms.",
-    "time_limit_minutes": 15,
-    "total_points": 40,
-    "created_at": "2026-09-22T14:30:00Z",
-    "questions": [
-      {
-        "id": "q2_1",
-        "question": "What is the worst-case time complexity of searching for an element in an unbalanced, degenerate Binary Search Tree?",
-        "options": [
-          "O(1)",
-          "O(log n)",
-          "O(n)",
-          "O(n log n)"
-        ],
-        "correct_option_index": 2,
-        "points": 10,
-        "explanation": "In an unbalanced BST (e.g. elements inserted in sorted order), the tree degenerates into a linked list where search is O(n)."
-      },
-      {
-        "id": "q2_2",
-        "question": "Which data structure provides average O(1) time complexity for insertion, deletion, and lookup operations?",
-        "options": [
-          "Hash Table / Map",
-          "Binary Search Tree",
-          "Red-Black Tree",
-          "Min Heap"
-        ],
-        "correct_option_index": 0,
-        "points": 10,
-        "explanation": "A hash table maps keys to array buckets via a hashing function, achieving average O(1) performance."
-      },
-      {
-        "id": "q2_3",
-        "question": "Which sorting algorithm maintains a guaranteed worst-case time complexity of O(n log n) by using the divide-and-conquer strategy?",
-        "options": [
-          "QuickSort",
-          "MergeSort",
-          "BubbleSort",
-          "InsertionSort"
-        ],
-        "correct_option_index": 1,
-        "points": 10,
-        "explanation": "MergeSort recursively halves the array and merges sorted halves, always running in O(n log n) even in the worst case."
-      },
-      {
-        "id": "q2_4",
-        "question": "What tree traversal sequence visits nodes in the order: Left Subtree -> Root Node -> Right Subtree?",
-        "options": [
-          "Pre-order Traversal",
-          "Post-order Traversal",
-          "In-order Traversal",
-          "Level-order Traversal"
-        ],
-        "correct_option_index": 2,
-        "points": 10,
-        "explanation": "In-order traversal visits left subtree, current node, then right subtree. On a BST, this yields keys in ascending sorted order."
-      }
-    ]
-  },
-  {
-    "id": "quiz_3",
-    "title": "Molecular Biology & DNA Replication Checkpoint",
-    "category": "Biology",
-    "chapter": "Chapter 7: Molecular Genetics",
-    "description": "Test your mastery over DNA replication enzymes, Okazaki fragments, and synthesis polarity.",
+    "id": "quiz_oth_hi",
+    "title": "हिंदी व्याकरण एवं साहित्य ज्ञान परीक्षा (Hindi Test)",
+    "branch": "Other",
+    "sub_category": "Hindi",
+    "category": "Other",
+    "chapter": "हिंदी व्याकरण व साहित्य",
+    "description": "रस, अलंकार तथा हिंदी साहित्य के प्रमुख कालखंडों पर आधारित ज्ञान परखें।",
     "time_limit_minutes": 10,
     "total_points": 20,
-    "created_at": "2026-09-23T12:00:00Z",
+    "created_at": "2026-09-26T16:06:00Z",
     "questions": [
       {
-        "id": "q3_1",
-        "question": "Which enzyme is responsible for unwinding the double-stranded DNA helix at the replication fork?",
+        "id": "q_hi_1",
+        "question": "हिंदी साहित्य के किस कालखंड को 'स्वर्ण युग' (Golden Age) कहा जाता है?",
         "options": [
-          "DNA Ligase",
-          "DNA Helicase",
-          "RNA Primase",
-          "Topoisomerase"
+          "आदिकाल",
+          "भक्तिकाल",
+          "रीतिकाल",
+          "आधुनिक काल"
         ],
         "correct_option_index": 1,
         "points": 10,
-        "explanation": "DNA Helicase breaks the hydrogen bonds holding the paired nitrogenous bases together, creating the replication fork."
+        "explanation": "कबीर, तुलसीदास, सूरदास और जायसी जैसे महान संतों की रचनाओं के कारण भक्तिकाल को हिंदी साहित्य का स्वर्ण युग कहा जाता है।"
       },
       {
-        "id": "q3_2",
-        "question": "In what direction does DNA Polymerase synthesize the new complementary daughter strand?",
+        "id": "q_hi_2",
+        "question": "'कनक कनक ते सौ गुनी, मादकता अधिकाय' में कौन-सा अलंकार है?",
         "options": [
-          "3' to 5' direction only",
-          "5' to 3' direction only",
-          "Bidirectionally without restriction",
-          "From either terminus depending on temperature"
+          "अनुप्रास अलंकार",
+          "यमक अलंकार",
+          "श्लेष अलंकार",
+          "उपमा अलंकार"
         ],
         "correct_option_index": 1,
         "points": 10,
-        "explanation": "DNA Polymerase can only add free nucleotides to the 3' hydroxyl (-OH) end of a growing polynucleotide chain, synthesizing 5' -> 3'."
+        "explanation": "यहाँ 'कनक' शब्द दो बार आया है और दोनों बार अर्थ अलग है (एक कनक = सोना, दूसरा कनक = धतूरा), इसलिए यह यमक अलंकार है।"
+      }
+    ]
+  },
+  {
+    "id": "quiz_oth_en",
+    "title": "Advanced English Grammar & Syntax Assessment",
+    "branch": "Other",
+    "sub_category": "English",
+    "category": "Other",
+    "chapter": "Unit 1: Advanced Syntax",
+    "description": "Evaluate proficiency in conditionals, parallelism, and grammatical agreement.",
+    "time_limit_minutes": 10,
+    "total_points": 20,
+    "created_at": "2026-09-26T16:07:00Z",
+    "questions": [
+      {
+        "id": "q_en_1",
+        "question": "Identify the sentence that correctly exemplifies Third Conditional syntax:",
+        "options": [
+          "If she studies hard, she will pass the exam.",
+          "If she had studied harder, she would have passed the exam.",
+          "If she studied harder, she would pass the exam.",
+          "If she studies hard, she passes the exam."
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "Third conditional structures follow: If + Past Perfect, would have + Past Participle."
+      },
+      {
+        "id": "q_en_2",
+        "question": "Which of the following contains a dangling modifier?",
+        "options": [
+          "Having finished the experiment, the scientist recorded the observations.",
+          "Having finished the experiment, the results were recorded.",
+          "After finishing the experiment, she left the laboratory.",
+          "Upon concluding the study, they published the findings."
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "In 'Having finished the experiment, the results were recorded', the results cannot finish an experiment, leaving the participle dangling."
       }
     ]
   }
