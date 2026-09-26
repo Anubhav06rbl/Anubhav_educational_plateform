@@ -955,5 +955,7 @@ async def delete_submission(submission_id: str, authorization: Optional[str] = H
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting EduSphere Educational Platform on http://127.0.0.1:8000 ...")
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+    print(f"Starting EduSphere Educational Platform on http://{host}:{port} ...")
+    uvicorn.run("app:app", host=host, port=port, reload=False)
