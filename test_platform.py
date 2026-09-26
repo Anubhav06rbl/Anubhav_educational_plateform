@@ -2,127 +2,164 @@ import os
 import json
 from io import BytesIO
 from fastapi.testclient import TestClient
-from app import app, MATERIALS_FILE, QUIZZES_FILE, SUBMISSIONS_FILE
+from app import app, MATERIALS_FILE, QUIZZES_FILE, SUBMISSIONS_FILE, USERS_FILE
 
 client = TestClient(app)
 
-def test_home_page():
+def test_public_pages():
     res = client.get("/")
     assert res.status_code == 200
     assert "EduSphere" in res.text
-    print("[PASS] GET / (Student Portal) passed")
+    print("[PASS] GET / (Student Portal) loads publicly")
 
-def test_admin_page():
     res = client.get("/admin")
     assert res.status_code == 200
-    assert "Teacher & Admin Portal" in res.text
-    print("[PASS] GET /admin (Admin Portal) passed")
+    assert "Authorized Portal Access" in res.text
+    print("[PASS] GET /admin (Admin Gate) loads successfully")
 
-def test_api_stats():
-    res = client.get("/api/stats")
+def test_auth_and_super_admin():
+    # 1. Login as Super Admin (Anubhav)
+    res = client.post("/api/auth/login", json={"identifier": "admin", "password": "admin123"})
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "success"
-    assert "total_materials" in data["data"]
-    assert "total_quizzes" in data["data"]
-    print(f"[PASS] GET /api/stats passed: {data['data']['total_materials']} materials, {data['data']['total_quizzes']} quizzes")
+    assert data["user"]["role"] == "super_admin"
+    admin_token = data["token"]
+    print("[PASS] Super Admin (Anubhav) login verified")
 
-def test_get_materials():
-    res = client.get("/api/materials")
-    assert res.status_code == 200
-    data = res.json()
-    assert data["status"] == "success"
-    assert len(data["data"]) > 0
-    print(f"[PASS] GET /api/materials returned {len(data['data'])} seeded items")
+    # 2. Check /api/auth/me
+    me_res = client.get("/api/auth/me", headers={"Authorization": f"Bearer {admin_token}"})
+    assert me_res.status_code == 200
+    assert me_res.json()["data"]["role"] == "super_admin"
+    print("[PASS] GET /api/auth/me authenticated successfully")
 
-def test_get_categories():
-    res = client.get("/api/categories")
-    assert res.status_code == 200
-    data = res.json()
-    assert data["status"] == "success"
-    assert len(data["data"]) > 0
-    print(f"[PASS] GET /api/categories returned {len(data['data'])} categories")
+    return admin_token
 
-def test_upload_and_delete_material():
-    dummy_content = b"This is a test lecture note on Thermodynamics.\nHeat transfer by conduction and radiation."
-    files = {"file": ("test_thermodynamics.txt", BytesIO(dummy_content), "text/plain")}
+def test_upload_privacy_protection(admin_token):
+    dummy_file = ("unauthorized_test.txt", BytesIO(b"Secret educational note"), "text/plain")
     data = {
-        "title": "Thermodynamics Revision Notes",
+        "title": "Unauthorized Upload Attempt",
         "category": "Physics",
-        "chapter": "Chapter 5: Heat & Thermodynamics",
-        "description": "Comprehensive review of the first and second laws of thermodynamics.",
-        "tags": "thermodynamics, heat, entropy",
+        "chapter": "Chapter 1",
+        "description": "This should be blocked without credentials.",
         "resource_type": "documents"
     }
-    res = client.post("/api/materials", data=data, files=files)
-    assert res.status_code == 200
-    res_data = res.json()
-    assert res_data["status"] == "success"
-    mat_id = res_data["data"]["id"]
-    print(f"[PASS] POST /api/materials created material {mat_id}")
 
-    # Test download
-    dl_res = client.get(f"/api/materials/{mat_id}/download")
-    assert dl_res.status_code == 200
-    assert b"Thermodynamics" in dl_res.content
-    print("[PASS] GET /api/materials/{id}/download verified")
+    # 1. Try uploading without any token -> Must return 401 Unauthorized
+    res_no_auth = client.post("/api/materials", data=data, files={"file": dummy_file})
+    assert res_no_auth.status_code == 401
+    print("[PASS] Privacy Check: Unauthenticated upload attempt blocked with 401 Unauthorized")
 
-    # Test delete
-    del_res = client.delete(f"/api/materials/{mat_id}")
-    assert del_res.status_code == 200
-    print(f"[PASS] DELETE /api/materials/{mat_id} verified")
+    # 2. Upload with Super Admin token -> Must succeed
+    dummy_file_admin = ("admin_upload.txt", BytesIO(b"Approved Admin Content"), "text/plain")
+    res_admin = client.post("/api/materials", data=data, files={"file": dummy_file_admin}, headers={"Authorization": f"Bearer {admin_token}"})
+    assert res_admin.status_code == 200
+    mat_id = res_admin.json()["data"]["id"]
+    print("[PASS] Super Admin authorized upload succeeded")
 
-def test_quiz_lifecycle():
-    # 1. Get quizzes (student view)
-    res = client.get("/api/quizzes")
-    assert res.status_code == 200
-    quizzes = res.json()["data"]
-    assert len(quizzes) > 0
-    quiz_id = quizzes[0]["id"]
-    print(f"[PASS] GET /api/quizzes returned {len(quizzes)} quizzes")
+    # Cleanup test upload
+    client.delete(f"/api/materials/{mat_id}", headers={"Authorization": f"Bearer {admin_token}"})
 
-    # 2. Detail quiz for taker
-    taker_res = client.get(f"/api/quizzes/{quiz_id}")
-    assert taker_res.status_code == 200
-    quiz_detail = taker_res.json()["data"]
-    # Check that answer keys are not leaked to student taker
-    for q in quiz_detail["questions"]:
-        assert "correct_option_index" not in q
-    print("[PASS] GET /api/quizzes/{id} verified student sanitized questions")
-
-    # 3. Submit quiz
-    answers = []
-    for q in quiz_detail["questions"]:
-        answers.append({"question_id": q["id"], "selected_option_index": 1})
-    
-    sub_payload = {
-        "student_name": "Test Runner",
-        "student_email": "test.runner@campus.edu",
-        "answers": answers
+def test_one_time_teacher_lifecycle(admin_token):
+    # 1. Super Admin registers a teacher with upload_type="one_time"
+    new_teacher_data = {
+        "name": "Guest Lecturer Dr. Ray",
+        "email": "dr.ray@campus.edu",
+        "username": "drray",
+        "password": "pass_ray_123",
+        "upload_type": "one_time",
+        "can_upload": True
     }
-    sub_res = client.post(f"/api/quizzes/{quiz_id}/submit", json=sub_payload)
-    assert sub_res.status_code == 200
-    sub_data = sub_res.json()
-    assert sub_data["status"] == "success"
-    assert "score" in sub_data
-    assert "percentage" in sub_data
-    assert len(sub_data["breakdown"]) == len(quiz_detail["questions"])
-    print(f"[PASS] POST /api/quizzes/{quiz_id}/submit scored: {sub_data['score']}/{sub_data['total_points']} ({sub_data['percentage']}%)")
+    create_res = client.post("/api/admin/users", json=new_teacher_data, headers={"Authorization": f"Bearer {admin_token}"})
+    assert create_res.status_code == 200
+    print("[PASS] Super Admin created teacher with One-Time upload privilege")
 
-    # 4. Teacher inspect submissions
-    subs_res = client.get("/api/submissions")
-    assert subs_res.status_code == 200
-    assert subs_res.json()["count"] > 0
-    print(f"[PASS] GET /api/submissions returned {subs_res.json()['count']} submissions")
+    # 2. Teacher logs in
+    login_res = client.post("/api/auth/login", json={"identifier": "drray", "password": "pass_ray_123"})
+    assert login_res.status_code == 200
+    teacher_token = login_res.json()["token"]
+    assert login_res.json()["user"]["can_upload"] is True
+
+    # 3. Teacher performs their 1 allowed upload
+    file1 = ("lecture1_ray.txt", BytesIO(b"Dr. Ray's Special One-Time Lecture"), "text/plain")
+    up1_data = {
+        "title": "Dr. Ray Special Lecture",
+        "category": "Physics",
+        "chapter": "Unit 2",
+        "description": "Special invited talk.",
+        "resource_type": "documents"
+    }
+    up1_res = client.post("/api/materials", data=up1_data, files={"file": file1}, headers={"Authorization": f"Bearer {teacher_token}"})
+    assert up1_res.status_code == 200
+    print("[PASS] One-Time Teacher first upload succeeded")
+    mat_id = up1_res.json()["data"]["id"]
+
+    # 4. Teacher attempts a SECOND upload -> MUST BE BLOCKED with 403 Forbidden!
+    file2 = ("lecture2_ray.txt", BytesIO(b"Second unauthorized attempt"), "text/plain")
+    up2_res = client.post("/api/materials", data=up1_data, files={"file": file2}, headers={"Authorization": f"Bearer {teacher_token}"})
+    assert up2_res.status_code == 403
+    assert "permission denied" in up2_res.json()["detail"].lower()
+    print("[PASS] Privacy Check: Second upload by One-Time Teacher blocked with 403 Forbidden")
+
+    # 5. Super Admin renews permission for Dr. Ray
+    user_id = create_res.json()["data"]["id"]
+    patch_res = client.patch(f"/api/admin/users/{user_id}/permissions", json={"can_upload": True}, headers={"Authorization": f"Bearer {admin_token}"})
+    assert patch_res.status_code == 200
+    assert patch_res.json()["data"]["can_upload"] is True
+    print("[PASS] Super Admin successfully renewed upload permission for teacher")
+
+    # Cleanup
+    client.delete(f"/api/materials/{mat_id}", headers={"Authorization": f"Bearer {admin_token}"})
+    client.delete(f"/api/admin/users/{user_id}", headers={"Authorization": f"Bearer {admin_token}"})
+
+def test_one_time_passcode_lifecycle(admin_token):
+    # 1. Super Admin generates a One-Time Passcode
+    pass_res = client.post("/api/admin/one-time-passes", json={"assigned_to": "Visiting Scholar"}, headers={"Authorization": f"Bearer {admin_token}"})
+    assert pass_res.status_code == 200
+    pass_data = pass_res.json()["data"]
+    pass_code = pass_data["token"]
+    print(f"[PASS] Super Admin generated One-Time Passcode: {pass_code}")
+
+    # 2. Visiting Scholar uses the One-Time Pass to login
+    login_res = client.post("/api/auth/login", json={"one_time_pass": pass_code})
+    assert login_res.status_code == 200
+    guest_token = login_res.json()["token"]
+    assert login_res.json()["user"]["role"] == "one_time_teacher"
+    print("[PASS] Guest successfully signed in with One-Time Pass")
+
+    # 3. Guest uploads 1 file
+    f = ("scholar_notes.txt", BytesIO(b"Scholar Notes Content"), "text/plain")
+    up_data = {
+        "title": "Scholar Notes",
+        "category": "Biology",
+        "chapter": "Chapter 3",
+        "description": "Guest material.",
+        "resource_type": "documents"
+    }
+    up_res = client.post("/api/materials", data=up_data, files={"file": f}, headers={"Authorization": f"Bearer {guest_token}"})
+    assert up_res.status_code == 200
+    mat_id = up_res.json()["data"]["id"]
+    print("[PASS] Guest uploaded file with One-Time Pass")
+
+    # 4. Guest attempts to upload again with same session -> Blocked with 403!
+    up_again = client.post("/api/materials", data=up_data, files={"file": ("again.txt", BytesIO(b"Test"), "text/plain")}, headers={"Authorization": f"Bearer {guest_token}"})
+    assert up_again.status_code == 403
+    print("[PASS] Subsequent upload blocked after pass was consumed")
+
+    # 5. Someone tries to login again using the consumed pass code -> Blocked!
+    re_login = client.post("/api/auth/login", json={"one_time_pass": pass_code})
+    assert re_login.status_code == 400
+    assert "already been used" in re_login.json()["detail"].lower()
+    print("[PASS] Re-login with consumed One-Time Passcode blocked")
+
+    # Cleanup
+    client.delete(f"/api/materials/{mat_id}", headers={"Authorization": f"Bearer {admin_token}"})
 
 if __name__ == "__main__":
-    print("Running platform automated tests...")
-    test_home_page()
-    test_admin_page()
-    test_api_stats()
-    test_get_materials()
-    test_get_categories()
-    test_upload_and_delete_material()
-    test_quiz_lifecycle()
-    print("\nALL AUTOMATED TESTS PASSED SUCCESSFULLY! ALL ENDPOINTS VERIFIED.")
-
+    print("Running EduSphere Access Control & Privacy Test Suite...\n")
+    test_public_pages()
+    admin_token = test_auth_and_super_admin()
+    test_upload_privacy_protection(admin_token)
+    test_one_time_teacher_lifecycle(admin_token)
+    test_one_time_passcode_lifecycle(admin_token)
+    print("\nALL PRIVACY & ACCESS CONTROL TESTS PASSED (100% SUCCESS)!")

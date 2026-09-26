@@ -13,6 +13,80 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
+  <!-- ========================================================= -->
+  <!-- AUTHENTICATION LOGIN OVERLAY (Shown if not logged in) -->
+  <!-- ========================================================= -->
+  <div id="adminAuthOverlay" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-slate-900 to-indigo-950 p-6 text-white text-center">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xl mx-auto mb-3 border border-indigo-400/20">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-xl font-black">Authorized Portal Access</h3>
+        <p class="text-xs text-indigo-200/80 mt-1">Sign in with your Admin/Teacher account or enter a One-Time Upload Pass.</p>
+      </div>
+
+      <!-- Login Tabs -->
+      <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-bold">
+        <button id="authTabCredentialsBtn" onclick="switchAuthTab('credentials')" class="flex-1 py-3 text-center border-b-2 border-indigo-600 text-indigo-700 bg-white">
+          <i class="fa-solid fa-user-lock mr-1.5"></i>Account Login
+        </button>
+        <button id="authTabOneTimeBtn" onclick="switchAuthTab('onetime')" class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+          <i class="fa-solid fa-ticket mr-1.5"></i>One-Time Pass
+        </button>
+      </div>
+
+      <div class="p-6">
+        <!-- FORM 1: Account Login -->
+        <form id="credentialsLoginForm" onsubmit="handleAccountLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email or Username</label>
+            <input type="text" id="loginIdentifier" placeholder="admin or your email" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+          </div>
+
+          <div id="loginAuthError" class="text-xs text-rose-600 font-bold hidden"></div>
+
+          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 transition-all flex items-center justify-center space-x-2">
+            <span>Sign In to Portal</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <div class="pt-3 border-t border-slate-100 text-center">
+            <span class="text-[11px] text-slate-400">Super Admin default: <strong class="text-slate-600">admin</strong> / <strong class="text-slate-600">admin123</strong></span>
+          </div>
+        </form>
+
+        <!-- FORM 2: One-Time Passcode Login -->
+        <form id="oneTimePassLoginForm" onsubmit="handleOneTimePassLogin(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Enter One-Time Pass Code</label>
+            <input type="text" id="loginPassCode" placeholder="e.g. PASS-PHYS72" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono tracking-wider text-center uppercase focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+            <p class="text-[11px] text-slate-400 mt-1.5 text-center">This pass code is issued by the Super Admin and permits 1 resource upload.</p>
+          </div>
+
+          <div id="passAuthError" class="text-xs text-rose-600 font-bold hidden"></div>
+
+          <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-200 transition-all flex items-center justify-center space-x-2">
+            <span>Use One-Time Pass</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="mt-4 text-center">
+          <a href="/" class="text-xs font-semibold text-slate-400 hover:text-indigo-600">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Return to Student Portal
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOP NAVIGATION BAR -->
   <header class="sticky top-0 z-40 glass-nav">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,32 +99,43 @@
           <div>
             <div class="flex items-center space-x-2">
               <span class="text-xl font-extrabold text-slate-900">EduSphere</span>
-              <span class="px-2 py-0.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full">Admin & Teacher Suite</span>
+              <span class="px-2 py-0.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full">Admin Suite</span>
             </div>
           </div>
         </div>
 
         <!-- Central Admin Tabs -->
-        <nav class="hidden md:flex items-center space-x-1">
+        <nav class="hidden lg:flex items-center space-x-1">
           <button id="adminTabUpload" onclick="switchAdminTab('upload')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm">
-            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Upload Resource
+            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Upload
           </button>
           <button id="adminTabMaterials" onclick="switchAdminTab('materials')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
-            <i class="fa-solid fa-folder-tree mr-1.5"></i>Manage Materials
+            <i class="fa-solid fa-folder-tree mr-1.5"></i>Materials
           </button>
           <button id="adminTabQuizBuilder" onclick="switchAdminTab('quizBuilder')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
             <i class="fa-solid fa-square-plus mr-1.5"></i>Quiz Builder
           </button>
           <button id="adminTabSubmissions" onclick="switchAdminTab('submissions')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100">
-            <i class="fa-solid fa-square-poll-vertical mr-1.5"></i>Student Submissions
+            <i class="fa-solid fa-square-poll-vertical mr-1.5"></i>Submissions
+          </button>
+          <!-- Special Super Admin Access Control Tab -->
+          <button id="adminTabAccessControl" onclick="switchAdminTab('accessControl')" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200">
+            <i class="fa-solid fa-users-gear mr-1.5"></i>Manage Permissions
           </button>
         </nav>
 
-        <!-- Switch to Student Portal -->
+        <!-- User Badge & Actions -->
         <div class="flex items-center space-x-3">
-          <a href="/" class="inline-flex items-center space-x-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-indigo-600 shadow-sm transition-all">
+          <div id="currentUserBadge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">
+            <span id="userRoleIcon" class="text-indigo-600"><i class="fa-solid fa-user"></i></span>
+            <span id="currentUserName" class="max-w-[130px] truncate">Admin</span>
+          </div>
+          <button onclick="handleLogout()" title="Log Out" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-xl text-xs transition-colors">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+          <a href="/" class="inline-flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-indigo-600 shadow-sm transition-all">
             <i class="fa-solid fa-graduation-cap text-indigo-600"></i>
-            <span>Student Portal</span>
+            <span class="hidden md:inline">Student Hub</span>
           </a>
         </div>
       </div>
@@ -58,11 +143,12 @@
   </header>
 
   <!-- MOBILE TAB NAVIGATION -->
-  <div class="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex items-center space-x-2 overflow-x-auto scrollbar-none">
+  <div class="lg:hidden bg-white border-b border-slate-200 px-4 py-2 flex items-center space-x-2 overflow-x-auto scrollbar-none">
     <button onclick="switchAdminTab('upload')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white">Upload</button>
     <button onclick="switchAdminTab('materials')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Materials</button>
     <button onclick="switchAdminTab('quizBuilder')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Quiz Builder</button>
     <button onclick="switchAdminTab('submissions')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600">Submissions</button>
+    <button id="mobileTabAccessControl" onclick="switchAdminTab('accessControl')" class="hidden shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 bg-amber-50">Permissions</button>
   </div>
 
   <!-- MAIN ADMIN CONTENT -->
@@ -113,7 +199,9 @@
     <!-- ========================================================= -->
     <section id="adminSectionUpload" class="block">
       <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm max-w-4xl mx-auto">
-        <div class="border-b border-slate-100 pb-5 mb-8">
+        
+        <!-- Header -->
+        <div class="border-b border-slate-100 pb-5 mb-6 flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
               <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -123,10 +211,33 @@
               <p class="text-xs text-slate-500">Publish lecture notes, video recordings, audio podcasts, diagrams, or slide decks.</p>
             </div>
           </div>
+          <!-- Upload Permission Badge -->
+          <span id="uploadPermissionIndicator" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Permission: Active
+          </span>
         </div>
 
+        <!-- Banner for One-Time Upload Mode -->
+        <div id="oneTimeUploadBanner" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center space-x-3">
+          <i class="fa-solid fa-bolt text-amber-600 text-base"></i>
+          <div>
+            <span class="font-bold">One-Time Upload Active:</span> You have been granted access to upload 1 educational resource. Upon publishing, this pass will automatically expire.
+          </div>
+        </div>
+
+        <!-- Restricted Upload Message (If can_upload == false) -->
+        <div id="uploadRestrictedBox" class="hidden p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h4 class="text-base font-bold text-slate-800">Upload Permission Restricted</h4>
+          <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            Your account does not currently have permission to upload files, or your one-time upload pass has already been used. Please contact Super Admin (<span class="font-semibold text-slate-700">Anubhav</span>) to request or renew upload access.
+          </p>
+        </div>
+
+        <!-- Form -->
         <form id="uploadMaterialForm" onsubmit="handleMaterialUpload(event)" class="space-y-6">
-          
           <!-- File Drop Zone -->
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Resource File <span class="text-rose-500">*</span></label>
@@ -159,13 +270,11 @@
 
           <!-- Metadata Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Title -->
             <div class="md:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Resource Title <span class="text-rose-500">*</span></label>
               <input type="text" id="uploadTitle" name="title" placeholder="e.g. Quantum Physics Fundamentals & Wave-Particle Duality" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
             </div>
 
-            <!-- Category / Subject -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subject / Category <span class="text-rose-500">*</span></label>
               <input type="text" id="uploadCategory" name="category" placeholder="e.g. Physics, Computer Science, Biology" list="categorySuggestions" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
@@ -179,13 +288,11 @@
               </datalist>
             </div>
 
-            <!-- Chapter / Unit -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Chapter / Unit <span class="text-rose-500">*</span></label>
               <input type="text" id="uploadChapter" name="chapter" placeholder="e.g. Unit 3: Quantum Mechanics" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
             </div>
 
-            <!-- Explicit Resource Type Override -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Resource Category / Type</label>
               <select id="uploadResourceType" name="resource_type" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -198,20 +305,17 @@
               </select>
             </div>
 
-            <!-- Tags -->
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tags (Comma-Separated)</label>
               <input type="text" id="uploadTags" name="tags" placeholder="e.g. Quantum, Planck, Photons, Revision" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
 
-            <!-- Description -->
             <div class="md:col-span-2">
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Curriculum Description & Study Notes <span class="text-rose-500">*</span></label>
               <textarea id="uploadDescription" name="description" rows="3" placeholder="Provide students with context, key concepts covered, or revision guidelines..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></textarea>
             </div>
           </div>
 
-          <!-- Submit Button -->
           <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
             <div id="uploadFeedbackMessage" class="text-xs font-bold hidden"></div>
             <button type="submit" id="uploadSubmitBtn" class="ml-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 flex items-center space-x-2 transition-all">
@@ -241,7 +345,6 @@
           </div>
         </div>
 
-        <!-- Materials Table -->
         <div class="overflow-x-auto mt-4">
           <table class="w-full text-left text-xs">
             <thead>
@@ -250,13 +353,11 @@
                 <th class="py-3 px-4">Subject & Chapter</th>
                 <th class="py-3 px-4">Type</th>
                 <th class="py-3 px-4">Size</th>
-                <th class="py-3 px-4">Uploaded</th>
+                <th class="py-3 px-4">Uploader</th>
                 <th class="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="adminMaterialsTableBody" class="divide-y divide-slate-100">
-              <!-- Rendered by JS -->
-            </tbody>
+            <tbody id="adminMaterialsTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -267,8 +368,6 @@
     <!-- ========================================================= -->
     <section id="adminSectionQuizBuilder" class="hidden">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Left 2 Cols: The Quiz Builder Form -->
         <div class="lg:col-span-2 space-y-6">
           <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
             <div class="flex items-center space-x-3 pb-5 border-b border-slate-100 mb-6">
@@ -281,7 +380,6 @@
               </div>
             </div>
 
-            <!-- Quiz General Info -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div class="sm:col-span-2">
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Quiz Title <span class="text-rose-500">*</span></label>
@@ -305,7 +403,6 @@
               </div>
             </div>
 
-            <!-- Dynamic Question Cards List -->
             <div class="pt-4 border-t border-slate-100">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Quiz Questions (<span id="questionCounterBadge">0</span>)</h3>
@@ -315,12 +412,9 @@
                 </button>
               </div>
 
-              <div id="questionsBuilderContainer" class="space-y-6">
-                <!-- Rendered dynamically -->
-              </div>
+              <div id="questionsBuilderContainer" class="space-y-6"></div>
             </div>
 
-            <!-- Save Quiz Bar -->
             <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
               <span id="quizBuilderError" class="text-xs text-rose-500 font-bold hidden"></span>
               <button onclick="saveNewQuiz()" class="ml-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-200 flex items-center space-x-2 transition-all">
@@ -331,18 +425,13 @@
           </div>
         </div>
 
-        <!-- Right 1 Col: Existing Quizzes List -->
         <div class="space-y-6">
           <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
             <h3 class="text-base font-black text-slate-800 mb-1">Active Quizzes</h3>
             <p class="text-xs text-slate-400 mb-4">Live tests available for students.</p>
-
-            <div id="adminExistingQuizzesList" class="space-y-3">
-              <!-- Rendered by JS -->
-            </div>
+            <div id="adminExistingQuizzesList" class="space-y-3"></div>
           </div>
         </div>
-
       </div>
     </section>
 
@@ -366,7 +455,6 @@
           </div>
         </div>
 
-        <!-- Submissions Table -->
         <div class="overflow-x-auto mt-4">
           <table class="w-full text-left text-xs">
             <thead>
@@ -379,19 +467,159 @@
                 <th class="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="adminSubmissionsTableBody" class="divide-y divide-slate-100">
-              <!-- Rendered by JS -->
-            </tbody>
+            <tbody id="adminSubmissionsTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
     </section>
 
+    <!-- ========================================================= -->
+    <!-- TAB 5: 👑 ACCESS CONTROL & TEACHER PERMISSIONS (ADMIN ONLY) -->
+    <!-- ========================================================= -->
+    <section id="adminSectionAccessControl" class="hidden space-y-8">
+      
+      <!-- Top Box: Super Admin Status -->
+      <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/60 p-6 rounded-3xl flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-md shadow-amber-200">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900">Super Admin Privacy & Upload Permissions Controller</h3>
+            <p class="text-xs text-slate-600">You (<span id="superAdminDisplayEmail" class="font-bold">anubhavrbl06@gmail.com</span>) have master control over who can upload files.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid 2 Columns: One-Time Pass Generator + Add Teacher Account -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- CARD 1: Generate One-Time Upload Pass -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <span class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-ticket"></i>
+              </span>
+              <div>
+                <h4 class="text-sm font-black text-slate-800">Generate One-Time Upload Pass</h4>
+                <p class="text-[11px] text-slate-400">Give a teacher or guest 1-time upload access without sharing passwords.</p>
+              </div>
+            </div>
+
+            <form onsubmit="handleGenerateOneTimePass(event)" class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase">Assigned To (Teacher Name / Subject)</label>
+                <input type="text" id="oneTimeAssignName" placeholder="e.g. Dr. Emily Stone (Guest Physics)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none" required />
+              </div>
+              <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-plus"></i>
+                <span>Generate Passcode</span>
+              </button>
+            </form>
+
+            <div id="newPassGeneratedBox" class="hidden mt-4 p-3 bg-purple-50 border border-purple-200 rounded-xl text-center">
+              <div class="text-[11px] font-semibold text-purple-700">One-Time Pass Generated!</div>
+              <div id="generatedPassCode" class="text-lg font-mono font-black text-purple-900 my-1">PASS-XXXXXX</div>
+              <button onclick="copyGeneratedPass()" class="text-[11px] font-bold text-purple-600 hover:text-purple-800 underline">
+                <i class="fa-regular fa-copy mr-1"></i>Copy Passcode
+              </button>
+            </div>
+          </div>
+
+          <!-- Existing One-Time Passes Table -->
+          <div class="mt-6 pt-4 border-t border-slate-100">
+            <h5 class="text-xs font-bold text-slate-700 mb-2">Issued Passes</h5>
+            <div id="oneTimePassesList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+        <!-- CARD 2: Create Teacher Account -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex items-center space-x-3 mb-4">
+            <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
+              <i class="fa-solid fa-user-plus"></i>
+            </span>
+            <div>
+              <h4 class="text-sm font-black text-slate-800">Add Teacher Account</h4>
+              <p class="text-[11px] text-slate-400">Register a teacher and specify whether their upload rights are Permanent or 1-Time.</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleCreateTeacher(event)" class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase">Teacher Full Name <span class="text-rose-500">*</span></label>
+              <input type="text" id="newTeacherName" placeholder="e.g. Prof. David Miller" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase">Email <span class="text-rose-500">*</span></label>
+                <input type="email" id="newTeacherEmail" placeholder="teacher@campus.edu" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase">Username <span class="text-rose-500">*</span></label>
+                <input type="text" id="newTeacherUsername" placeholder="dmiller" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase">Password <span class="text-rose-500">*</span></label>
+                <input type="password" id="newTeacherPassword" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" required />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 uppercase">Upload Privilege Mode</label>
+                <select id="newTeacherUploadType" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  <option value="one_time">⚡ One-Time Upload (Expires after 1 file)</option>
+                  <option value="permanent">♾️ Permanent Upload Rights</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="createTeacherFeedback" class="text-xs font-bold hidden"></div>
+
+            <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-user-check"></i>
+              <span>Create Teacher Account</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Full-Width Teacher Accounts & Permissions Table -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center justify-between pb-5 border-b border-slate-100">
+          <div>
+            <h4 class="text-base font-black text-slate-800">Teacher Upload Access Control</h4>
+            <p class="text-xs text-slate-500">Toggle upload permissions on/off in real-time or switch between One-Time and Permanent upload modes.</p>
+          </div>
+          <button onclick="loadUsersTable()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Teacher Name & Account</th>
+                <th class="py-3 px-4">Upload Mode</th>
+                <th class="py-3 px-4">Uploads Count</th>
+                <th class="py-3 px-4">Upload Permission</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
-  <!-- ========================================================= -->
   <!-- MODAL: DETAILED SUBMISSION ANSWER SHEET INSPECTOR -->
-  <!-- ========================================================= -->
   <div id="submissionDetailModal" class="fixed inset-0 z-50 hidden modal-backdrop-blur flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 my-auto">
       <div class="px-6 py-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
@@ -405,27 +633,18 @@
       </div>
 
       <div class="p-6 overflow-y-auto max-h-[75vh]">
-        <!-- Top Score Bar -->
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
           <div>
             <div class="text-xs font-bold text-slate-400 uppercase">Student Score</div>
             <div id="subModalScoreText" class="text-xl font-black text-slate-900">30 / 30</div>
           </div>
-          <div id="subModalPctBadge" class="px-3.5 py-1.5 rounded-xl font-black text-sm bg-emerald-100 text-emerald-700">
-            100%
-          </div>
+          <div id="subModalPctBadge" class="px-3.5 py-1.5 rounded-xl font-black text-sm bg-emerald-100 text-emerald-700">100%</div>
         </div>
-
-        <!-- Answers List -->
-        <div id="subModalAnswersList" class="space-y-4">
-          <!-- Populated by JS -->
-        </div>
+        <div id="subModalAnswersList" class="space-y-4"></div>
       </div>
 
       <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
-        <button onclick="closeModal('submissionDetailModal')" class="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800">
-          Close
-        </button>
+        <button onclick="closeModal('submissionDetailModal')" class="px-5 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800">Close</button>
       </div>
     </div>
   </div>

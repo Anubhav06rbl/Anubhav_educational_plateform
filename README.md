@@ -32,6 +32,12 @@ EduSphere is a full-stack, production-grade educational platform built with **Py
 ---
 
 ### 2. 👨‍🏫 Teacher / Admin Portal (`/admin`)
+- **👑 Super Admin & Privacy Controller (Anubhav)**:
+  - Master Super Admin account (`anubhavrbl06@gmail.com` or `admin`).
+  - **Upload Access Control**: Only authorized users can upload resources. Unauthorized requests receive `401 Unauthorized` / `403 Forbidden`.
+  - **Live Permission Switch**: Toggle any teacher's upload permissions (`Allowed` vs `Blocked`) in real time.
+  - **⚡ One-Time Upload Passes**: Generate instant single-use passcodes (e.g. `PASS-PHYS72`) for guest lecturers or teachers. Once they upload 1 resource, their access automatically expires and cannot be reused!
+  - **Account Types**: Assign teachers either **Permanent Upload Rights** or **One-Time Upload Rights**.
 - **Educational Resource Uploader**:
   - Drag-and-drop or browse file picker.
   - Automatic category/type detection from file extension with optional manual override.
@@ -42,12 +48,7 @@ EduSphere is a full-stack, production-grade educational platform built with **Py
   - Quick action buttons to preview in browser, download, or delete from disk and database.
 - **Interactive Quiz Builder**:
   - Form to define Quiz Title, Subject, Chapter, Time Limit (minutes), and Instructions.
-  - Dynamic Question Creator:
-    - Add/remove unlimited questions.
-    - Add/remove option choices (2 to 6+ options per question).
-    - Mark correct answer via radio buttons.
-    - Assign custom point values per question (e.g., 5, 10, 20 pts).
-    - Attach pedagogical explanations that appear to students upon grading.
+  - Dynamic Question Creator with points, multiple choices, answer keys, and explanations.
 - **Quiz Submissions & Grading Analytics**:
   - Real-time submissions table with student name, score, total points, percentage badge, and timestamp.
   - **Answer Sheet Inspector**: Modal that displays the student's complete test paper with question-by-question breakdown, student choices, correct answer keys, and explanations.

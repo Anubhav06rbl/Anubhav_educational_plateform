@@ -1,26 +1,239 @@
 /**
- * EduSphere Learning Platform - Teacher & Admin Portal Logic
+ * EduSphere Learning Platform - Teacher & Super Admin Portal Logic
+ * Includes Role-Based Access Control and One-Time Upload Passes
  */
 
 let adminState = {
   currentTab: 'upload',
+  authToken: sessionStorage.getItem('edusphere_token') || null,
+  currentUser: JSON.parse(sessionStorage.getItem('edusphere_user') || 'null'),
   materials: [],
   quizzes: [],
   submissions: [],
   selectedFile: null,
-  builderQuestions: [] // Array of question objects being created
+  builderQuestions: []
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchAdminStats();
+document.addEventListener('DOMContentLoaded', async () => {
   setupDropZone();
+  addQuestionCard();
+
+  // Check existing session
+  if (adminState.authToken) {
+    await verifyCurrentSession();
+  } else {
+    showAuthOverlay();
+  }
+});
+
+function getAuthHeaders(customHeaders = {}) {
+  const headers = { ...customHeaders };
+  if (adminState.authToken) {
+    headers['Authorization'] = `Bearer ${adminState.authToken}`;
+  }
+  return headers;
+}
+
+// ==========================================
+// AUTHENTICATION & SESSION MANAGEMENT
+// ==========================================
+
+function showAuthOverlay() {
+  document.getElementById('adminAuthOverlay').classList.remove('hidden');
+}
+
+function hideAuthOverlay() {
+  document.getElementById('adminAuthOverlay').classList.add('hidden');
+}
+
+function switchAuthTab(type) {
+  const credBtn = document.getElementById('authTabCredentialsBtn');
+  const otpBtn = document.getElementById('authTabOneTimeBtn');
+  const credForm = document.getElementById('credentialsLoginForm');
+  const otpForm = document.getElementById('oneTimePassLoginForm');
+
+  if (type === 'credentials') {
+    credBtn.className = "flex-1 py-3 text-center border-b-2 border-indigo-600 text-indigo-700 bg-white";
+    otpBtn.className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+    credForm.classList.remove('hidden');
+    otpForm.classList.add('hidden');
+  } else {
+    otpBtn.className = "flex-1 py-3 text-center border-b-2 border-purple-600 text-purple-700 bg-white";
+    credBtn.className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+    otpForm.classList.remove('hidden');
+    credForm.classList.add('hidden');
+  }
+}
+
+async function handleAccountLogin(e) {
+  e.preventDefault();
+  const ident = document.getElementById('loginIdentifier').value.trim();
+  const pwd = document.getElementById('loginPassword').value.trim();
+  const errEl = document.getElementById('loginAuthError');
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: ident, password: pwd })
+    });
+    const json = await res.json();
+
+    if (json.status === 'success') {
+      applySession(json.token, json.user);
+    } else {
+      errEl.textContent = json.detail || "Authentication failed.";
+      errEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errEl.textContent = "Server connection error. Please try again.";
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function handleOneTimePassLogin(e) {
+  e.preventDefault();
+  const passCode = document.getElementById('loginPassCode').value.trim();
+  const errEl = document.getElementById('passAuthError');
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ one_time_pass: passCode })
+    });
+    const json = await res.json();
+
+    if (json.status === 'success') {
+      applySession(json.token, json.user);
+    } else {
+      errEl.textContent = json.detail || "Invalid or used One-Time Pass.";
+      errEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errEl.textContent = "Server connection error. Please try again.";
+    errEl.classList.remove('hidden');
+  }
+}
+
+function applySession(token, user) {
+  adminState.authToken = token;
+  adminState.currentUser = user;
+  sessionStorage.setItem('edusphere_token', token);
+  sessionStorage.setItem('edusphere_user', JSON.stringify(user));
+
+  hideAuthOverlay();
+  initializePortalForRole();
+}
+
+async function verifyCurrentSession() {
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      adminState.currentUser = json.data;
+      sessionStorage.setItem('edusphere_user', JSON.stringify(json.data));
+      hideAuthOverlay();
+      initializePortalForRole();
+    } else {
+      handleLogout();
+    }
+  } catch (err) {
+    showAuthOverlay();
+  }
+}
+
+async function handleLogout() {
+  if (adminState.authToken) {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+    } catch (_) {}
+  }
+  adminState.authToken = null;
+  adminState.currentUser = null;
+  sessionStorage.removeItem('edusphere_token');
+  sessionStorage.removeItem('edusphere_user');
+  location.reload();
+}
+
+function initializePortalForRole() {
+  const user = adminState.currentUser;
+  if (!user) return;
+
+  // Header user badge
+  const nameEl = document.getElementById('currentUserName');
+  const iconEl = document.getElementById('userRoleIcon');
+  nameEl.textContent = user.name;
+
+  const accessControlTab = document.getElementById('adminTabAccessControl');
+  const mobileAccessControlTab = document.getElementById('mobileTabAccessControl');
+
+  if (user.role === 'super_admin') {
+    iconEl.innerHTML = '<i class="fa-solid fa-crown text-amber-500"></i>';
+    accessControlTab.classList.remove('hidden');
+    mobileAccessControlTab.classList.remove('hidden');
+  } else if (user.role === 'one_time_teacher') {
+    iconEl.innerHTML = '<i class="fa-solid fa-bolt text-purple-600"></i>';
+    accessControlTab.classList.add('hidden');
+    mobileAccessControlTab.classList.add('hidden');
+  } else {
+    iconEl.innerHTML = '<i class="fa-solid fa-chalkboard-user text-indigo-600"></i>';
+    accessControlTab.classList.add('hidden');
+    mobileAccessControlTab.classList.add('hidden');
+  }
+
+  // Upload Permissions UI
+  updateUploadPermissionUI();
+
+  // Load section data
+  fetchAdminStats();
   loadAdminMaterials();
   loadAdminQuizzes();
   loadAdminSubmissions();
 
-  // Initialize Quiz Builder with 1 starter question
-  addQuestionCard();
-});
+  if (user.role === 'super_admin') {
+    loadUsersTable();
+    loadOneTimePasses();
+  }
+}
+
+function updateUploadPermissionUI() {
+  const user = adminState.currentUser;
+  const indicator = document.getElementById('uploadPermissionIndicator');
+  const form = document.getElementById('uploadMaterialForm');
+  const restrictedBox = document.getElementById('uploadRestrictedBox');
+  const oneTimeBanner = document.getElementById('oneTimeUploadBanner');
+
+  if (!user) return;
+
+  if (user.can_upload) {
+    form.classList.remove('hidden');
+    restrictedBox.classList.add('hidden');
+
+    if (user.upload_type === 'one_time') {
+      indicator.className = "px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200";
+      indicator.innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> Mode: One-Time Upload';
+      oneTimeBanner.classList.remove('hidden');
+    } else {
+      indicator.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+      indicator.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Upload: Authorized';
+      oneTimeBanner.classList.add('hidden');
+    }
+  } else {
+    form.classList.add('hidden');
+    restrictedBox.classList.remove('hidden');
+    oneTimeBanner.classList.add('hidden');
+    indicator.className = "px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200";
+    indicator.innerHTML = '<i class="fa-solid fa-ban mr-1"></i> Upload: Restricted';
+  }
+}
 
 // ==========================================
 // TABS SWITCHER
@@ -32,34 +245,41 @@ function switchAdminTab(tab) {
     upload: document.getElementById('adminSectionUpload'),
     materials: document.getElementById('adminSectionMaterials'),
     quizBuilder: document.getElementById('adminSectionQuizBuilder'),
-    submissions: document.getElementById('adminSectionSubmissions')
+    submissions: document.getElementById('adminSectionSubmissions'),
+    accessControl: document.getElementById('adminSectionAccessControl')
   };
 
   const buttons = {
     upload: document.getElementById('adminTabUpload'),
     materials: document.getElementById('adminTabMaterials'),
     quizBuilder: document.getElementById('adminTabQuizBuilder'),
-    submissions: document.getElementById('adminTabSubmissions')
+    submissions: document.getElementById('adminTabSubmissions'),
+    accessControl: document.getElementById('adminTabAccessControl')
   };
 
   Object.keys(sections).forEach(key => {
-    if (key === tab) {
-      sections[key].classList.remove('hidden');
-      if (buttons[key]) {
-        buttons[key].className = "px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm";
-      }
-    } else {
-      sections[key].classList.add('hidden');
-      if (buttons[key]) {
-        buttons[key].className = "px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100";
+    if (sections[key]) {
+      if (key === tab) {
+        sections[key].classList.remove('hidden');
+        if (buttons[key]) {
+          buttons[key].className = "px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm";
+        }
+      } else {
+        sections[key].classList.add('hidden');
+        if (buttons[key]) {
+          buttons[key].className = "px-3.5 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-indigo-600 hover:bg-slate-100";
+        }
       }
     }
   });
 
-  // Refresh data if switching to specific tabs
   if (tab === 'materials') loadAdminMaterials();
   if (tab === 'submissions') loadAdminSubmissions();
   if (tab === 'quizBuilder') loadAdminQuizzes();
+  if (tab === 'accessControl') {
+    loadUsersTable();
+    loadOneTimePasses();
+  }
 }
 
 // ==========================================
@@ -130,7 +350,6 @@ function processSelectedFile(file) {
   document.getElementById('selectedFileName').textContent = file.name;
   document.getElementById('selectedFileSize').textContent = formatBytes(file.size);
 
-  // Set appropriate icon
   const icon = document.getElementById('selectedFileIcon');
   const ext = file.name.split('.').pop().toLowerCase();
 
@@ -146,7 +365,6 @@ function processSelectedFile(file) {
     icon.className = "fa-solid fa-file-lines";
   }
 
-  // Pre-fill Title with sanitized file name if title input is empty
   const titleInput = document.getElementById('uploadTitle');
   if (!titleInput.value.trim()) {
     const rawName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
@@ -183,24 +401,26 @@ async function handleMaterialUpload(e) {
   try {
     const res = await fetch('/api/materials', {
       method: 'POST',
+      headers: getAuthHeaders(),
       body: formData
     });
     const json = await res.json();
 
     if (json.status === 'success') {
-      feedback.textContent = `Resource "${json.data.title}" successfully published!`;
+      feedback.textContent = json.message;
       feedback.className = "text-xs font-bold text-emerald-600 block";
       
-      // Reset form
       document.getElementById('uploadMaterialForm').reset();
       clearSelectedFile(new Event('dummy'));
       fetchAdminStats();
       loadAdminMaterials();
-      
-      // Optional switch to materials tab after 1.2s
-      setTimeout(() => {
-        feedback.classList.add('hidden');
-      }, 3500);
+
+      // If user was on one-time pass, update their live state
+      if (adminState.currentUser.upload_type === 'one_time') {
+        adminState.currentUser.can_upload = false;
+        sessionStorage.setItem('edusphere_user', JSON.stringify(adminState.currentUser));
+        updateUploadPermissionUI();
+      }
     } else {
       feedback.textContent = `Upload failed: ${json.detail || "Server error"}`;
       feedback.className = "text-xs font-bold text-rose-600 block";
@@ -279,7 +499,10 @@ function renderAdminMaterialsTable(materials) {
           ${typeBadges[mat.resource_type] || '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">File</span>'}
         </td>
         <td class="py-3.5 px-4 font-mono text-slate-500">${mat.filesize_formatted}</td>
-        <td class="py-3.5 px-4 text-slate-500">${dateFormatted}</td>
+        <td class="py-3.5 px-4 text-slate-500">
+          <div class="font-semibold text-slate-700">${escapeHtml(mat.uploaded_by || 'Admin')}</div>
+          <div class="text-[10px] text-slate-400">${dateFormatted}</div>
+        </td>
         <td class="py-3.5 px-4 text-right">
           <div class="flex items-center justify-end space-x-1.5">
             <a href="${mat.file_url}" target="_blank" title="Preview Raw" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-100">
@@ -302,7 +525,10 @@ async function deleteAdminMaterial(id, title) {
   if (!confirm(`Are you sure you want to permanently delete '${title}'?`)) return;
 
   try {
-    const res = await fetch(`/api/materials/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/materials/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     if (json.status === 'success') {
       loadAdminMaterials();
@@ -348,7 +574,6 @@ function renderBuilderQuestions() {
 
   container.innerHTML = adminState.builderQuestions.map((q, qIdx) => `
     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 relative">
-      <!-- Question Header -->
       <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/80">
         <span class="text-xs font-black text-indigo-700 flex items-center space-x-1.5">
           <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">${qIdx + 1}</span>
@@ -366,13 +591,11 @@ function renderBuilderQuestions() {
         </div>
       </div>
 
-      <!-- Question Prompt Input -->
       <div class="mb-4">
         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Question Prompt <span class="text-rose-500">*</span></label>
         <textarea rows="2" placeholder="e.g. What is the fundamental constant in Planck's quantum equation?" oninput="updateQuestionField(${qIdx}, 'question', this.value)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>${escapeHtml(q.question)}</textarea>
       </div>
 
-      <!-- Options List -->
       <div class="space-y-2 mb-4">
         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">
           Answer Options <span class="text-slate-400 font-normal">(Select radio button next to correct answer)</span>
@@ -395,7 +618,6 @@ function renderBuilderQuestions() {
         </button>
       </div>
 
-      <!-- Explanation Input -->
       <div>
         <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
           Solution Explanation <span class="text-slate-400 font-normal">(Shown to students upon grading)</span>
@@ -444,7 +666,6 @@ async function saveNewQuiz() {
     return;
   }
 
-  // Validate questions
   for (let i = 0; i < adminState.builderQuestions.length; i++) {
     const q = adminState.builderQuestions[i];
     if (!q.question.trim()) {
@@ -473,14 +694,13 @@ async function saveNewQuiz() {
   try {
     const res = await fetch('/api/quizzes', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload)
     });
     const json = await res.json();
 
     if (json.status === 'success') {
       alert(`Quiz "${title}" published successfully!`);
-      // Reset form
       document.getElementById('newQuizTitle').value = "";
       document.getElementById('newQuizChapter').value = "";
       document.getElementById('newQuizDescription').value = "";
@@ -507,11 +727,12 @@ async function loadAdminQuizzes() {
   const container = document.getElementById('adminExistingQuizzesList');
   const submissionFilter = document.getElementById('submissionQuizFilter');
   try {
-    const res = await fetch('/api/admin/quizzes');
+    const res = await fetch('/api/admin/quizzes', {
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     adminState.quizzes = json.data || [];
 
-    // Populate submissions dropdown filter
     if (submissionFilter) {
       let filterOpts = '<option value="all">All Quizzes</option>';
       adminState.quizzes.forEach(q => {
@@ -545,7 +766,10 @@ async function deleteAdminQuiz(quizId, title) {
   if (!confirm(`Are you sure you want to permanently delete the quiz '${title}'?`)) return;
 
   try {
-    const res = await fetch(`/api/quizzes/${quizId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/quizzes/${quizId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     if (json.status === 'success') {
       loadAdminQuizzes();
@@ -574,7 +798,9 @@ async function loadAdminSubmissions() {
   }
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     adminState.submissions = json.data || [];
     renderSubmissionsTable(adminState.submissions);
@@ -631,7 +857,9 @@ function renderSubmissionsTable(submissions) {
 
 async function inspectSubmissionSheet(submissionId) {
   try {
-    const res = await fetch(`/api/submissions/${submissionId}`);
+    const res = await fetch(`/api/submissions/${submissionId}`, {
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     if (json.status !== 'success') {
       alert("Failed to load submission details.");
@@ -704,7 +932,10 @@ async function inspectSubmissionSheet(submissionId) {
 async function deleteSubmissionRecord(subId) {
   if (!confirm("Delete this submission record?")) return;
   try {
-    const res = await fetch(`/api/submissions/${subId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/submissions/${subId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
     const json = await res.json();
     if (json.status === 'success') {
       loadAdminSubmissions();
@@ -716,7 +947,246 @@ async function deleteSubmissionRecord(subId) {
 }
 
 // ==========================================
-// MODAL & UTILITY FUNCTIONS
+// 👑 SUPER ADMIN: ACCESS CONTROL & PERMISSIONS
+// ==========================================
+
+async function loadUsersTable() {
+  const tbody = document.getElementById('usersTableBody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.status !== 'success') return;
+
+    if (json.super_admin && json.super_admin.email) {
+      const emailEl = document.getElementById('superAdminDisplayEmail');
+      if (emailEl) emailEl.textContent = json.super_admin.email;
+    }
+
+    const users = json.data || [];
+    if (users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">No teacher accounts created yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+      const isOneTime = (u.upload_type === 'one_time');
+      const canUpload = u.can_upload;
+
+      return `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-3.5 px-4">
+            <div class="font-bold text-slate-800">${escapeHtml(u.name)}</div>
+            <div class="text-[11px] text-slate-400">${escapeHtml(u.email)} (@${escapeHtml(u.username)})</div>
+          </td>
+          <td class="py-3.5 px-4">
+            <select onchange="updateUserUploadMode('${u.id}', this.value)" class="text-[11px] font-bold px-2.5 py-1 rounded-lg border border-slate-200 bg-white">
+              <option value="one_time" ${isOneTime ? 'selected' : ''}>⚡ One-Time</option>
+              <option value="permanent" ${!isOneTime ? 'selected' : ''}>♾️ Permanent</option>
+            </select>
+          </td>
+          <td class="py-3.5 px-4 font-mono font-bold text-slate-700">
+            ${u.uploads_count || 0} ${isOneTime ? '/ 1' : 'files'}
+          </td>
+          <td class="py-3.5 px-4">
+            <button onclick="toggleUserUploadPermission('${u.id}', ${canUpload})" class="px-3 py-1 rounded-xl text-xs font-black transition-all ${canUpload ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-rose-100 text-rose-800 hover:bg-rose-200'}">
+              ${canUpload ? '<i class="fa-solid fa-check mr-1"></i> Allowed' : '<i class="fa-solid fa-xmark mr-1"></i> Blocked'}
+            </button>
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <button onclick="deleteTeacherAccount('${u.id}', '${escapeHtml(u.name)}')" class="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="Delete Teacher">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load users table:', err);
+  }
+}
+
+async function toggleUserUploadPermission(userId, currentCanUpload) {
+  try {
+    const res = await fetch(`/api/admin/users/${userId}/permissions`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ can_upload: !currentCanUpload })
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      loadUsersTable();
+    }
+  } catch (err) {
+    console.error('Failed to toggle upload permission:', err);
+  }
+}
+
+async function updateUserUploadMode(userId, mode) {
+  try {
+    const res = await fetch(`/api/admin/users/${userId}/permissions`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ upload_type: mode, can_upload: true })
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      loadUsersTable();
+    }
+  } catch (err) {
+    console.error('Failed to update upload mode:', err);
+  }
+}
+
+async function deleteTeacherAccount(userId, name) {
+  if (!confirm(`Delete teacher account '${name}'?`)) return;
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      loadUsersTable();
+    }
+  } catch (err) {
+    console.error('Failed to delete user:', err);
+  }
+}
+
+async function handleCreateTeacher(e) {
+  e.preventDefault();
+  const feedback = document.getElementById('createTeacherFeedback');
+  feedback.classList.add('hidden');
+
+  const payload = {
+    name: document.getElementById('newTeacherName').value.trim(),
+    email: document.getElementById('newTeacherEmail').value.trim(),
+    username: document.getElementById('newTeacherUsername').value.trim(),
+    password: document.getElementById('newTeacherPassword').value.trim(),
+    upload_type: document.getElementById('newTeacherUploadType').value,
+    can_upload: true
+  };
+
+  try {
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (json.status === 'success') {
+      feedback.textContent = `Teacher ${payload.name} created successfully!`;
+      feedback.className = "text-xs font-bold text-emerald-600 block";
+      document.getElementById('newTeacherName').value = "";
+      document.getElementById('newTeacherEmail').value = "";
+      document.getElementById('newTeacherUsername').value = "";
+      document.getElementById('newTeacherPassword').value = "";
+      loadUsersTable();
+    } else {
+      feedback.textContent = json.detail || "Failed to create teacher.";
+      feedback.className = "text-xs font-bold text-rose-600 block";
+    }
+  } catch (err) {
+    feedback.textContent = "Server error while creating teacher.";
+    feedback.className = "text-xs font-bold text-rose-600 block";
+  }
+}
+
+// ------------------------------------------
+// ONE-TIME PASS MANAGEMENT
+// ------------------------------------------
+
+async function loadOneTimePasses() {
+  const container = document.getElementById('oneTimePassesList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/one-time-passes', {
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    const passes = json.data || [];
+
+    if (passes.length === 0) {
+      container.innerHTML = `<div class="text-[11px] text-slate-400 py-3 text-center">No active or used passes.</div>`;
+      return;
+    }
+
+    container.innerHTML = passes.map(p => {
+      const isUsed = (p.status === 'used');
+      return `
+        <div class="p-2.5 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between text-xs">
+          <div>
+            <div class="font-mono font-bold text-purple-900">${p.token}</div>
+            <div class="text-[10px] text-slate-400">${escapeHtml(p.assigned_to)} • ${isUsed ? '<span class="text-rose-600 font-bold">USED</span>' : '<span class="text-emerald-600 font-bold">ACTIVE</span>'}</div>
+          </div>
+          <div class="flex items-center space-x-1">
+            <button onclick="navigator.clipboard.writeText('${p.token}'); alert('Passcode copied to clipboard: ${p.token}');" class="p-1 text-slate-400 hover:text-purple-600" title="Copy Passcode">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+            <button onclick="revokeOneTimePass('${p.id}')" class="p-1 text-slate-400 hover:text-rose-600" title="Revoke Pass">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load passes:', err);
+  }
+}
+
+async function handleGenerateOneTimePass(e) {
+  e.preventDefault();
+  const name = document.getElementById('oneTimeAssignName').value.trim();
+  try {
+    const res = await fetch('/api/admin/one-time-passes', {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ assigned_to: name })
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      const pass = json.data;
+      document.getElementById('generatedPassCode').textContent = pass.token;
+      document.getElementById('newPassGeneratedBox').classList.remove('hidden');
+      document.getElementById('oneTimeAssignName').value = "";
+      loadOneTimePasses();
+    }
+  } catch (err) {
+    alert("Failed to generate pass.");
+  }
+}
+
+function copyGeneratedPass() {
+  const code = document.getElementById('generatedPassCode').textContent;
+  navigator.clipboard.writeText(code);
+  alert(`One-Time Passcode copied: ${code}\nShare this code with your teacher to let them upload 1 resource.`);
+}
+
+async function revokeOneTimePass(passId) {
+  if (!confirm("Revoke this pass?")) return;
+  try {
+    const res = await fetch(`/api/admin/one-time-passes/${passId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const json = await res.json();
+    if (json.status === 'success') {
+      loadOneTimePasses();
+    }
+  } catch (err) {
+    console.error('Failed to revoke pass:', err);
+  }
+}
+
+// ==========================================
+// MODALS & HELPERS
 // ==========================================
 
 function openModal(modalId) {
