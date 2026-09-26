@@ -1,5 +1,22 @@
 [
   {
+    "id": "mat_7032ce9dce",
+    "title": "ML   1",
+    "category": "Computer Science",
+    "chapter": "1",
+    "resource_type": "images",
+    "description": "it is about what is ml and its fundamentals",
+    "tags": [
+      "ML fundamentals"
+    ],
+    "filename": "ML_-_1_5fabd8eb.png",
+    "original_name": "ML - 1.png",
+    "file_url": "/uploads/images/ML_-_1_5fabd8eb.png",
+    "filesize": 2607575,
+    "filesize_formatted": "2.5 MB",
+    "uploaded_at": "2026-09-26T07:44:13.167598Z"
+  },
+  {
     "id": "mat_1",
     "title": "Quantum Physics Fundamentals & Wave-Particle Duality",
     "category": "Physics",
