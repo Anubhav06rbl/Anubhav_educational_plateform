@@ -238,7 +238,12 @@ async def login(payload: LoginRequest):
 
     # Check Super Admin
     super_admin = users_db.get("super_admin", {})
-    if (ident in [super_admin.get("email", "").lower(), super_admin.get("username", "").lower()]) and (pwd == super_admin.get("password_hash")):
+    admin_identifiers = [
+        super_admin.get("email", "").lower(),
+        super_admin.get("username", "").lower(),
+        "anubhav"
+    ]
+    if (ident in admin_identifiers) and (pwd == super_admin.get("password_hash")):
         token = f"sess_admin_{uuid.uuid4().hex}"
         session_data = {
             "user_id": super_admin.get("id"),
