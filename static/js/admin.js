@@ -207,7 +207,7 @@ function initializePortalForRole() {
   const mobileAccessControlTab = document.getElementById('mobileTabAccessControl');
 
   if (user.role === 'super_admin') {
-    iconEl.innerHTML = '<i class="fa-solid fa-crown text-amber-500"></i>';
+    iconEl.innerHTML = '<img src="/static/images/anubhav_founder.jpg" class="w-5 h-5 rounded-full object-cover inline-block ring-1 ring-amber-400" onerror="this.outerHTML=\'<i class=\\\'fa-solid fa-crown text-amber-500\\\'></i>\'" />';
     accessControlTab.classList.remove('hidden');
     mobileAccessControlTab.classList.remove('hidden');
   } else if (user.role === 'one_time_teacher') {
