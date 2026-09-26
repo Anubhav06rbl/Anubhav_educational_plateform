@@ -16,7 +16,7 @@ let adminState = {
 
 const BRANCH_TAXONOMY = {
   "Computer Science": ["Machine Learning (ML)", "Python", "Generative AI (GenAI)"],
-  "Science": ["Physics", "Chemistry", "Biology"],
+  "Science": ["Physics", "Chemistry", "Biology", "Mathematics"],
   "Humanities": ["History", "Geography", "Political Science"],
   "Other": ["Hindi", "English"]
 };

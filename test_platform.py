@@ -190,9 +190,10 @@ def test_branch_taxonomy_filtering():
     taxonomy = res_json.get("taxonomy", {})
     assert "Computer Science" in taxonomy
     assert "Science" in taxonomy
+    assert "Mathematics" in taxonomy["Science"]
     assert "Humanities" in taxonomy
     assert "Other" in taxonomy
-    print("[PASS] GET /api/categories returns all 4 branches with sub-categories")
+    print("[PASS] GET /api/categories returns all 4 branches with sub-categories including Mathematics")
 
     # 2. Test GET /api/materials?branch=Science
     res_sci = client.get("/api/materials?branch=Science")
@@ -202,7 +203,15 @@ def test_branch_taxonomy_filtering():
     assert len(materials_sci) > 0
     print("[PASS] Branch filter 'Science' returned matching materials")
 
-    # 3. Test GET /api/materials?branch=Computer Science&sub_category=Python
+    # 3. Test GET /api/materials?branch=Science&sub_category=Mathematics
+    res_math = client.get("/api/materials?branch=Science&sub_category=Mathematics")
+    assert res_math.status_code == 200
+    materials_math = res_math.json()["data"]
+    assert len(materials_math) > 0
+    assert all(m.get("sub_category") == "Mathematics" for m in materials_math)
+    print("[PASS] Sub-category filter 'Mathematics' in 'Science' verified")
+
+    # 4. Test GET /api/materials?branch=Computer Science&sub_category=Python
     res_py = client.get("/api/materials?branch=Computer%20Science&sub_category=Python")
     assert res_py.status_code == 200
     materials_py = res_py.json()["data"]

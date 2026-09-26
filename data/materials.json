@@ -144,6 +144,30 @@
     "uploaded_at": "2026-09-22T09:40:00Z"
   },
   {
+    "id": "mat_sci_4",
+    "title": "Higher Mathematics: Calculus, Linear Algebra & Differential Equations",
+    "branch": "Science",
+    "sub_category": "Mathematics",
+    "category": "Science",
+    "chapter": "Advanced Mathematical Foundations",
+    "resource_type": "documents",
+    "description": "Comprehensive reference notes on limits, derivatives, Fundamental Theorem of Calculus, matrices, eigenvalues/eigenvectors, and second-order ODEs.",
+    "tags": [
+      "Mathematics",
+      "Calculus",
+      "LinearAlgebra",
+      "DifferentialEquations",
+      "Science"
+    ],
+    "filename": "mathematics_calculus_linear_algebra.txt",
+    "file_url": "/uploads/documents/mathematics_calculus_linear_algebra.txt",
+    "is_external_link": false,
+    "filesize": 2048,
+    "filesize_formatted": "2.1 KB",
+    "uploaded_by": "Anubhav (Super Admin)",
+    "uploaded_at": "2026-09-26T16:22:00Z"
+  },
+  {
     "id": "mat_hum_1",
     "title": "Modern World History: Industrial Revolution to Contemporary Era",
     "branch": "Humanities",

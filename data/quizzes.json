@@ -198,5 +198,45 @@
         "explanation": "In 'Having finished the experiment, the results were recorded', the results cannot finish an experiment, leaving the participle dangling."
       }
     ]
+  },
+  {
+    "id": "quiz_sci_math",
+    "title": "Calculus & Linear Algebra Foundations Quiz",
+    "branch": "Science",
+    "sub_category": "Mathematics",
+    "category": "Science",
+    "chapter": "Higher Mathematics",
+    "description": "Evaluate your understanding of derivatives, integration by parts, matrix determinants, and eigenvalues.",
+    "time_limit_minutes": 10,
+    "total_points": 20,
+    "created_at": "2026-09-26T16:22:00Z",
+    "questions": [
+      {
+        "id": "q_math_1",
+        "question": "What is the derivative of f(x) = ln(3x^2 + 1) with respect to x?",
+        "options": [
+          "6x / (3x^2 + 1)",
+          "1 / (3x^2 + 1)",
+          "3x / (3x^2 + 1)",
+          "6 / (3x^2 + 1)"
+        ],
+        "correct_option_index": 0,
+        "points": 10,
+        "explanation": "Using the chain rule: d/dx ln(u) = (1/u) * du/dx. Here u = 3x^2 + 1, so du/dx = 6x, yielding 6x / (3x^2 + 1)."
+      },
+      {
+        "id": "q_math_2",
+        "question": "If matrix A has eigenvalues lambda_1 = 3 and lambda_2 = 5, what is the determinant of A?",
+        "options": [
+          "8",
+          "15",
+          "2",
+          "0"
+        ],
+        "correct_option_index": 1,
+        "points": 10,
+        "explanation": "The determinant of any square matrix equals the product of its eigenvalues: det(A) = 3 * 5 = 15."
+      }
+    ]
   }
 ]

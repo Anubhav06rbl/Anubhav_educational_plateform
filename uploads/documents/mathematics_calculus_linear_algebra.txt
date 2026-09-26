@@ -1,0 +1,51 @@
+================================================================================
+EDUSPHERE ACADEMIC CURRICULUM: SCIENCE STREAM - MATHEMATICS
+HIGHER MATHEMATICS: CALCULUS, LINEAR ALGEBRA & DIFFERENTIAL EQUATIONS
+Author: Anubhav (Platform Lead & Super Admin)
+================================================================================
+
+1. DIFFERENTIAL & INTEGRAL CALCULUS
+--------------------------------------------------------------------------------
+* Limits & Continuity:
+  - Definition of Limit: lim(x->a) f(x) = L if for every eps > 0, exists delta > 0.
+  - L'Hopital's Rule: For indeterminate forms 0/0 or inf/inf,
+    lim [f(x) / g(x)] = lim [f'(x) / g'(x)].
+
+* Derivative Essentials:
+  - Power Rule: d/dx (x^n) = n * x^(n-1)
+  - Product Rule: (u * v)' = u' * v + u * v'
+  - Quotient Rule: (u / v)' = (u' * v - u * v') / v^2
+  - Chain Rule: d/dx f(g(x)) = f'(g(x)) * g'(x)
+
+* Fundamental Theorem of Calculus:
+  - Part 1: If F(x) = \int_a^x f(t) dt, then F'(x) = f(x).
+  - Part 2: \int_a^b f(x) dx = F(b) - F(a), where F'(x) = f(x).
+
+2. LINEAR ALGEBRA & VECTOR SPACES
+--------------------------------------------------------------------------------
+* Matrices and Determinants:
+  - For a 2x2 matrix A = [[a, b], [c, d]], det(A) = ad - bc.
+  - Inverse matrix: A^(-1) = (1 / det(A)) * [[d, -b], [-c, a]], valid when det(A) != 0.
+  
+* Eigenvalues and Eigenvectors:
+  - Characteristic Equation: det(A - lambda * I) = 0.
+  - Solving for lambda yields the eigenvalues; solving (A - lambda * I) * v = 0 gives eigenvectors.
+  - Applications: Principal Component Analysis (PCA), quantum mechanics state representations, stability analysis.
+
+3. DIFFERENTIAL EQUATIONS
+--------------------------------------------------------------------------------
+* First-Order Separable Equations:
+  - Form: dy/dx = g(x) * h(y)  =>  (1 / h(y)) dy = g(x) dx
+  - Integrating both sides solves for y(x).
+
+* Second-Order Linear Homogeneous ODEs:
+  - Form: a * y'' + b * y' + c * y = 0
+  - Characteristic equation: a * r^2 + b * r + c = 0
+  - Discriminant D = b^2 - 4ac:
+    * D > 0: Two distinct real roots r1, r2 => y(x) = C1 * e^(r1*x) + C2 * e^(r2*x)
+    * D = 0: Repeated root r => y(x) = (C1 + C2 * x) * e^(r*x)
+    * D < 0: Complex conjugate roots alpha +- beta*i => y(x) = e^(alpha*x) * [C1*cos(beta*x) + C2*sin(beta*x)]
+
+================================================================================
+End of Reference Guide | EduSphere Open Courseware Series
+================================================================================
